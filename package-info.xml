@@ -3,11 +3,10 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:Highlighting</id>
 	<name>Code Highlighting</name>
-	<version>1.3</version>
+	<version>0.1</version>
 	<type>modification</type>
 
-	<install for="2.0 - 2.0.99">
-		<readme parsebbc="true" lang="russian-utf8">readme/russian-utf8.txt</readme>
+	<install for="SMF 2.1 Beta 3, SMF 2.1 Beta 4, 2.1 - 2.1.99">
 		<readme parsebbc="true" lang="russian">readme/russian.txt</readme>
 		<readme parsebbc="true">readme/readme.txt</readme>
 		<require-dir name="Themes" destination="$boarddir" />
@@ -16,7 +15,7 @@
 		<redirect url="?action=admin;area=modsettings;sa=highlight" timeout="1000" />
 	</install>
 
-	<uninstall for="2.0 - 2.0.99">
+	<uninstall for="SMF 2.1 Beta 3, SMF 2.1 Beta 4, 2.1 - 2.1.99">
 		<code>hooks.php</code>
 		<remove-file name="$sourcedir/Class-Highlighting.php" />
 		<remove-file name="$themedir/scripts/highlight.pack.js" />

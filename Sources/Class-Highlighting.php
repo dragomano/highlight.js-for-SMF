@@ -9,7 +9,7 @@
  * @copyright 2010-2018 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3
+ * @version 0.1
  */
 
 if (!defined('SMF'))
@@ -55,9 +55,6 @@ class Code_Highlighting
 		$context['ch_css_path'] = !empty($modSettings['ch_cdn_use']) ? '//cdnjs.cloudflare.com/ajax/libs/highlight.js/' . CH_VER . '/styles/' . $modSettings['ch_style'] . '.min.css' : $settings['default_theme_url'] . '/css/highlight/' . $modSettings['ch_style'] . '.css';
 
 		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'showoperations')
-			return;
-
-		if (defined('WIRELESS') && WIRELESS)
 			return;
 
 		// Highlight
