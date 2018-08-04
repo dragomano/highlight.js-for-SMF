@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
+<package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
+	<id>Bugo:Highlighting</id>
+	<name>Code Highlighting</name>
+	<version>1.3</version>
+	<type>modification</type>
+
+	<install for="2.0 - 2.0.99">
+		<readme parsebbc="true" lang="russian-utf8">readme/russian-utf8.txt</readme>
+		<readme parsebbc="true" lang="russian">readme/russian.txt</readme>
+		<readme parsebbc="true">readme/readme.txt</readme>
+		<require-dir name="Themes" destination="$boarddir" />
+		<require-dir name="Sources" destination="$boarddir" />
+		<code>hooks.php</code>
+		<redirect url="?action=admin;area=modsettings;sa=highlight" timeout="1000" />
+	</install>
+
+	<uninstall for="2.0 - 2.0.99">
+		<code>hooks.php</code>
+		<remove-file name="$sourcedir/Class-Highlighting.php" />
+		<remove-file name="$themedir/scripts/highlight.pack.js" />
+		<remove-file name="$themedir/scripts/clipboard.min.js" />
+		<remove-file name="$themedir/images/clippy.svg" />
+		<remove-file name="$themedir/css/highlight.css" />
+		<remove-dir name="$languagedir/Highlighting" />
+		<remove-dir name="$themedir/css/highlight" />
+		<redirect url="?action=admin;area=packages;sa=browse" timeout="1000" />
+	</uninstall>
+
+</package-info>

@@ -1,0 +1,53 @@
+.codePages {color: #777; position: relative;  padding-left: 5px; float: left; width: 30px; height: 1px;} 
+.codeContent {position: relative; font-size: x-small; padding-left: 30px; padding-bottom: 10px;}
+.block_code {
+	position: relative;
+	top: -10px;
+}
+.block_code pre code {
+	display: block;
+	font-family: "Inconsolata", "Lucida Console", "Courier New", monospace;
+	white-space: pre-wrap;
+}
+pre {
+	overflow: auto;
+	max-height: 20em;
+    background: #f6f6f6;
+	border: 2px solid #ddd;
+    border-radius: 2px;
+    position: relative;
+}
+.bd-clipboard {
+	position: relative;
+	display: none;
+}
+@media (min-width: 768px) {
+	.bd-clipboard {
+		display: block;
+	}
+}
+.bd-clipboard+pre{
+	margin-top:0;
+}
+pre .btn-clipboard {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+    background-color: #eee;
+    border-color: #ddd;
+    border-radius: 2px;
+    background-image: url(../images/clippy.svg);
+    background-position: 50% 50%;
+    background-size: 16px 16px;
+    background-repeat: no-repeat;
+    width: 27px;
+    height: 1.525rem;
+    display: inline-block;
+    vertical-align: middle;
+    background-color: #f9f2f4;
+    margin-left: -.2rem;
+    cursor: pointer;
+}
+.btn-clipboard:hover {
+    background-color: #d9d9d9;
+}
