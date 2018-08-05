@@ -9,7 +9,7 @@
  * @copyright 2010-2018 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 0.1
+ * @version 0.2
  */
 
 if (!defined('SMF'))
@@ -190,7 +190,7 @@ class Code_Highlighting
 			$codes[] = 	array(
 				'tag' => 'code',
 				'type' => 'unparsed_content',
-				'content' => '<div class="codeheader">' . $txt['code'] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code>$1</code></pre></div>',
+				'content' => '<div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code>$1</code></pre></div>',
 				'validate' => function(&$tag, &$data, $disabled)
 				{
 					if (!isset($disabled['code']))
@@ -202,9 +202,8 @@ class Code_Highlighting
 			$codes[] = array(
 				'tag' => 'code',
 				'type' => 'unparsed_equals_content',
-				'validate' => function(&$tag, &$data, $disabled)
+				'validate' => function(&$tag, &$data, $disabled) use ($txt, $modSettings)
 				{
-					global $txt, $modSettings;
 					$tag['content'] = '<div class="codeheader">' . $txt['code'] . ': ' . $data[1] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code class="' . $data[1] . '">' . rtrim($data[0], "\n\r") . '</code></pre></div>';
 				},
 				'block_level' => true,
