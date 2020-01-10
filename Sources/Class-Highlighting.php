@@ -6,26 +6,26 @@
  * @package Code Highlighting
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/code-highlighting
- * @copyright 2010-2018 Bugo
+ * @copyright 2010-2020 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 0.2
+ * @version 0.3
  */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-define('CH_VER', '9.12.0');
+define('CH_VER', '9.15.9');
 
 class Code_Highlighting
 {
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'Code_Highlighting::loadTheme', false);
+		add_integration_function('integrate_load_theme', 'Code_Highlighting::loadTheme', false, __FILE__);
 		add_integration_function('integrate_admin_areas', 'Code_Highlighting::adminAreas', false);
-		add_integration_function('integrate_modify_modifications', 'Code_Highlighting::modifyModifications', false);
-		add_integration_function('integrate_bbc_codes', 'Code_Highlighting::bbcCodes', false);
-		add_integration_function('integrate_buffer', 'Code_Highlighting::buffer', false);
+		add_integration_function('integrate_modify_modifications', 'Code_Highlighting::modifyModifications', false, __FILE__);
+		add_integration_function('integrate_bbc_codes', 'Code_Highlighting::bbcCodes', false, __FILE__);
+		add_integration_function('integrate_buffer', 'Code_Highlighting::buffer', false, __FILE__);
 	}
 
 
@@ -69,28 +69,28 @@ class Code_Highlighting
 			}
 
 			$context['html_headers'] .= '
-	<link rel="stylesheet" type="text/css" href="' . $context['ch_css_path'] . '" />
-	<link rel="stylesheet" type="text/css" href="' . $settings['default_theme_url'] . '/css/highlight.css" />';
+	<link rel="stylesheet" href="' . $context['ch_css_path'] . '">
+	<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
 
 			if (!in_array($context['current_action'], array('helpadmin', 'printpage')))
 				$context['insert_after_template'] .= '
-		<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>
+		<script src="' . $context['ch_jss_path'] . '"></script>
 		<script src="' . $context['ch_clb_path'] . '"></script>
-		<script type="text/javascript">
+		<script>
 			hljs.tabReplace = "' . $tab . '";
 			hljs.initHighlightingOnLoad();
 			window.addEventListener("load", function() {
-				var pre = document.getElementsByTagName("code");
-				for (var i = 0; i < pre.length; i++) {
-					var divClipboard = document.createElement("div");
+				let pre = document.getElementsByTagName("code");
+				for (let i = 0; i < pre.length; i++) {
+					let divClipboard = document.createElement("div");
 					divClipboard.className = "bd-clipboard";
-					var button = document.createElement("span");
+					let button = document.createElement("span");
 					button.className = "btn-clipboard";
 					button.setAttribute("title", "' . $txt['ch_copy'] . '");
 					divClipboard.appendChild(button);
 					pre[i].parentElement.insertBefore(divClipboard,pre[i]);
 				}
-				var btnClipboard = new Clipboard(".btn-clipboard", {
+				let btnClipboard = new Clipboard(".btn-clipboard", {
 					target: function(trigger) {
 						console.log(trigger.parentElement.nextElementSibling);
 						trigger.clearSelection;
@@ -107,11 +107,10 @@ class Code_Highlighting
 		// Preview
 		if (!empty($modSettings['ch_enable']) && in_array($context['current_action'], array('post', 'post2')))
 			$context['insert_after_template'] .= '
-			<script type="text/javascript">
-				var previewPost = function() {
-					if (document.forms.postmodify.elements["message"].value.lastIndexOf(\'[/code]\') != -1) {
+			<script>
+				let previewPost = function() {
+					if (document.forms.postmodify.elements["message"].value.lastIndexOf(\'[/code]\') != -1)
 						return submitThisOnce(document.forms.postmodify);
-					}
 				}
 			</script>';
 	}
@@ -213,7 +212,7 @@ class Code_Highlighting
 
 		// Copyright Info
 		if (isset($context['current_action']) && $context['current_action'] == 'credits')
-			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank">Code Highlighting</a> &copy; 2010&ndash;' . date('Y') . ', Bugo';
+			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2020, Bugo';
 	}
 
 	public static function buffer($buffer)
@@ -223,10 +222,10 @@ class Code_Highlighting
 		$search = $replace = '';
 
 		if (!empty($modSettings['ch_enable']) && isset($txt['operation_title'])) {
-			$css = "\n\t\t" . '<link rel="stylesheet" type="text/css" href="' . $context['ch_css_path'] . '" />
-			<link rel="stylesheet" type="text/css" href="' . $settings['default_theme_url'] . '/css/highlight.css" />';
-			$js = "\n\t\t" . '<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>
-			<script type="text/javascript">hljs.initHighlightingOnLoad();</script>';
+			$css = "\n\t\t" . '<link rel="stylesheet" href="' . $context['ch_css_path'] . '">
+			<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
+			$js = "\n\t\t" . '<script src="' . $context['ch_jss_path'] . '"></script>
+			<script>hljs.initHighlightingOnLoad();</script>';
 			$search = '<title>' . $txt['operation_title'] . '</title>';
 			$replace = $search . $css . $js;
 		}

@@ -1,5 +1,12 @@
 # Code Highlighting for SMF
+* **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/code-highlighting)
+* **License:** [BSD](https://opensource.org/licenses/BSD-3-Clause)
+* **Compatible with:** SMF 2.1.x
+* **Tested on:** PHP 7.3+ / MariaDB 10.3+ / PostgreSQL 9.6+
+* **Hooks only:** Yes
+* **Languages:** English, French, Russian, Spanish
 
+## Description
 This script highlights syntax in code examples on your forum.
 It is very easy to use because it works automatically: finds blocks of code, detects a language, highlights it.
 Supported languages: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash etc.
@@ -10,6 +17,7 @@ Highlight.js is released under the BSD License.
 
 ------
 
+## Описание
 Подсветка с автоматическим определением используемого языка, а также с возможностью выбора стиля оформления.
 Поддерживаемые языки: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash и многие другие.
 
