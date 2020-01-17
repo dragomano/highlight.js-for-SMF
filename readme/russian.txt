@@ -1,9 +1,9 @@
 [center][color=red][size=16pt][b]Code Highlighting[/b][/size][/color]
 [color=blue][b][size=10pt]By Bugo[/size][/b][/color]
 
-[color=green]Џодсветка с автоматическим определением используемого Языка, а также с возможностью выбора стилЯ оформлениЯ.
-Џоддерживаемые Языки: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash и многие другие.[/color]
+[color=green]РџРѕРґСЃРІРµС‚РєР° СЃ Р°РІС‚РѕРјР°С‚РёС‡РµСЃРєРёРј РѕРїСЂРµРґРµР»РµРЅРёРµРј РёСЃРїРѕР»СЊР·СѓРµРјРѕРіРѕ СЏР·С‹РєР°, Р° С‚Р°РєР¶Рµ СЃ РІРѕР·РјРѕР¶РЅРѕСЃС‚СЊСЋ РІС‹Р±РѕСЂР° СЃС‚РёР»СЏ РѕС„РѕСЂРјР»РµРЅРёСЏ.
+РџРѕРґРґРµСЂР¶РёРІР°РµРјС‹Рµ СЏР·С‹РєРё: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash Рё РјРЅРѕРіРёРµ РґСЂСѓРіРёРµ.[/color]
 
-€спользуетсЯ скрипт [url=https://highlightjs.org]highlight.js[/url].
+РСЃРїРѕР»СЊР·СѓРµС‚СЃСЏ СЃРєСЂРёРїС‚ [url=https://highlightjs.org]highlight.js[/url].
 
-[b][size=11pt]Highlight.js распространЯетсЯ на условиЯх лицензии BSD[/size][/b][/center]
+[b][size=11pt]Highlight.js СЂР°СЃРїСЂРѕСЃС‚СЂР°РЅСЏРµС‚СЃСЏ РЅР° СѓСЃР»РѕРІРёСЏС… Р»РёС†РµРЅР·РёРё BSD[/size][/b][/center]

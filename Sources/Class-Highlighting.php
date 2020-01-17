@@ -6,29 +6,39 @@
  * @package Code Highlighting
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/code-highlighting
- * @copyright 2010-2018 Bugo
+ * @copyright 2010-2020 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3
+ * @version 0.4
  */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-define('CH_VER', '9.12.0');
+define('CH_VER', '9.15.9');
 
 class Code_Highlighting
 {
+	/**
+	 * Подключаем используемые хуки
+	 *
+	 * @return void
+	 */
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'Code_Highlighting::loadTheme', false);
-		add_integration_function('integrate_admin_areas', 'Code_Highlighting::adminAreas', false);
-		add_integration_function('integrate_modify_modifications', 'Code_Highlighting::modifyModifications', false);
-		add_integration_function('integrate_bbc_codes', 'Code_Highlighting::bbcCodes', false);
-		add_integration_function('integrate_buffer', 'Code_Highlighting::buffer', false);
+		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme', false, __FILE__);
+		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false, __FILE__);
+		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch', false, __FILE__);
+		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications', false, __FILE__);
+		add_integration_function('integrate_bbc_codes', __CLASS__ . '::bbcCodes', false, __FILE__);
+		add_integration_function('integrate_buffer', __CLASS__ . '::buffer', false, __FILE__);
 	}
 
-
+	/**
+	 * Подключаем скрипты и стили
+	 *
+	 * @return void
+	 */
 	public static function loadTheme()
 	{
 		global $modSettings, $context, $settings, $txt;
@@ -57,9 +67,6 @@ class Code_Highlighting
 		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'showoperations')
 			return;
 
-		if (defined('WIRELESS') && WIRELESS)
-			return;
-
 		// Highlight
 		if (!empty($modSettings['ch_enable'])) {
 			$i = 0;
@@ -72,28 +79,28 @@ class Code_Highlighting
 			}
 
 			$context['html_headers'] .= '
-	<link rel="stylesheet" type="text/css" href="' . $context['ch_css_path'] . '" />
-	<link rel="stylesheet" type="text/css" href="' . $settings['default_theme_url'] . '/css/highlight.css" />';
+	<link rel="stylesheet" href="' . $context['ch_css_path'] . '">
+	<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
 
 			if (!in_array($context['current_action'], array('helpadmin', 'printpage')))
 				$context['insert_after_template'] .= '
-		<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>
+		<script src="' . $context['ch_jss_path'] . '"></script>
 		<script src="' . $context['ch_clb_path'] . '"></script>
-		<script type="text/javascript">
+		<script>
 			hljs.tabReplace = "' . $tab . '";
 			hljs.initHighlightingOnLoad();
 			window.addEventListener("load", function() {
-				var pre = document.getElementsByTagName("code");
-				for (var i = 0; i < pre.length; i++) {
-					var divClipboard = document.createElement("div");
+				let pre = document.getElementsByTagName("code");
+				for (let i = 0; i < pre.length; i++) {
+					let divClipboard = document.createElement("div");
 					divClipboard.className = "bd-clipboard";
-					var button = document.createElement("span");
+					let button = document.createElement("span");
 					button.className = "btn-clipboard";
 					button.setAttribute("title", "' . $txt['ch_copy'] . '");
 					divClipboard.appendChild(button);
 					pre[i].parentElement.insertBefore(divClipboard,pre[i]);
 				}
-				var btnClipboard = new Clipboard(".btn-clipboard", {
+				let btnClipboard = new Clipboard(".btn-clipboard", {
 					target: function(trigger) {
 						console.log(trigger.parentElement.nextElementSibling);
 						trigger.clearSelection;
@@ -110,15 +117,20 @@ class Code_Highlighting
 		// Preview
 		if (!empty($modSettings['ch_enable']) && in_array($context['current_action'], array('post', 'post2')))
 			$context['insert_after_template'] .= '
-			<script type="text/javascript">
-				var previewPost = function() {
-					if (document.forms.postmodify.elements["message"].value.lastIndexOf(\'[/code]\') != -1) {
+			<script>
+				let previewPost = function() {
+					if (document.forms.postmodify.elements["message"].value.lastIndexOf(\'[/code]\') != -1)
 						return submitThisOnce(document.forms.postmodify);
-					}
 				}
 			</script>';
 	}
 
+	/**
+	 * Создаем секцию с настройками мода в админке
+	 *
+	 * @param array $admin_areas
+	 * @return void
+	 */
 	public static function adminAreas(&$admin_areas)
 	{
 		global $txt;
@@ -126,12 +138,36 @@ class Code_Highlighting
 		$admin_areas['config']['areas']['modsettings']['subsections']['highlight'] = array($txt['ch_title']);
 	}
 
+	/**
+	 * Легкий доступ к настройкам мода через быстрый поиск в админке
+	 *
+	 * @param array $language_files
+	 * @param array $include_files
+	 * @param array $settings_search
+	 * @return void
+	 */
+	public static function adminSearch(&$language_files, &$include_files, &$settings_search)
+	{
+		$settings_search[] = array(__CLASS__ . '::settings', 'area=modsettings;sa=highlight');
+	}
+
+	/**
+	 * Подключаем вкладку с настройками мода
+	 *
+	 * @param actions $subActions
+	 * @return void
+	 */
 	public static function modifyModifications(&$subActions)
 	{
 		$subActions['highlight'] = array('Code_Highlighting', 'settings');
 	}
 
-	public static function settings()
+	/**
+	 * Определяем настройки мода
+	 *
+	 * @return array|void
+	 */
+	public static function settings($return_config = false)
 	{
 		global $context, $txt, $scripturl, $settings, $modSettings;
 
@@ -170,16 +206,28 @@ class Code_Highlighting
 		if (!empty($modSettings['ch_enable']) && function_exists('file_get_contents'))
 			$config_vars[] = array('callback', 'ch_example');
 
+		if ($return_config)
+			return $config_vars;
+
 		// Saving?
 		if (isset($_GET['save'])) {
 			checkSession();
-			saveDBSettings($config_vars);
+
+			$save_vars = $config_vars;
+			saveDBSettings($save_vars);
+
 			redirectexit('action=admin;area=modsettings;sa=highlight');
 		}
 
 		prepareDBSettingContext($config_vars);
 	}
 
+	/**
+	 * Изменяем оформление ББ-тега [code]
+	 *
+	 * @param array $codes
+	 * @return void
+	 */
 	public static function bbcCodes(&$codes)
 	{
 		global $modSettings, $txt, $context;
@@ -193,7 +241,7 @@ class Code_Highlighting
 			$codes[] = 	array(
 				'tag' => 'code',
 				'type' => 'unparsed_content',
-				'content' => '<div class="codeheader">' . $txt['code'] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code>$1</code></pre></div>',
+				'content' => '<div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code>$1</code></pre></div>',
 				'validate' => function(&$tag, &$data, $disabled)
 				{
 					if (!isset($disabled['code']))
@@ -205,9 +253,8 @@ class Code_Highlighting
 			$codes[] = array(
 				'tag' => 'code',
 				'type' => 'unparsed_equals_content',
-				'validate' => function(&$tag, &$data, $disabled)
+				'validate' => function(&$tag, &$data, $disabled) use ($txt, $modSettings)
 				{
-					global $txt, $modSettings;
 					$tag['content'] = '<div class="codeheader">' . $txt['code'] . ': ' . $data[1] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code class="' . $data[1] . '">' . rtrim($data[0], "\n\r") . '</code></pre></div>';
 				},
 				'block_level' => true,
@@ -217,9 +264,15 @@ class Code_Highlighting
 
 		// Copyright Info
 		if (isset($context['current_action']) && $context['current_action'] == 'credits')
-			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank">Code Highlighting</a> &copy; 2010&ndash;' . date('Y') . ', Bugo';
+			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2020, Bugo';
 	}
 
+	/**
+	 * Производим замены в буфере страницы
+	 *
+	 * @param array $buffer
+	 * @return void
+	 */
 	public static function buffer($buffer)
 	{
 		global $modSettings, $txt, $context, $settings;
@@ -227,10 +280,10 @@ class Code_Highlighting
 		$search = $replace = '';
 
 		if (!empty($modSettings['ch_enable']) && isset($txt['operation_title'])) {
-			$css = "\n\t\t" . '<link rel="stylesheet" type="text/css" href="' . $context['ch_css_path'] . '" />
-			<link rel="stylesheet" type="text/css" href="' . $settings['default_theme_url'] . '/css/highlight.css" />';
-			$js = "\n\t\t" . '<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>
-			<script type="text/javascript">hljs.initHighlightingOnLoad();</script>';
+			$css = "\n\t\t" . '<link rel="stylesheet" href="' . $context['ch_css_path'] . '">
+			<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
+			$js = "\n\t\t" . '<script src="' . $context['ch_jss_path'] . '"></script>
+			<script>hljs.initHighlightingOnLoad();</script>';
 			$search = '<title>' . $txt['operation_title'] . '</title>';
 			$replace = $search . $css . $js;
 		}
@@ -239,7 +292,7 @@ class Code_Highlighting
 	}
 }
 
-// Example
+// Область предпросмотра
 function template_callback_ch_example()
 {
 	global $settings, $txt;
