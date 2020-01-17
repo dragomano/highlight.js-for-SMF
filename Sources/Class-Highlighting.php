@@ -9,7 +9,7 @@
  * @copyright 2010-2020 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 0.3
+ * @version 0.4
  */
 
 if (!defined('SMF'))
@@ -19,16 +19,26 @@ define('CH_VER', '9.15.9');
 
 class Code_Highlighting
 {
+	/**
+	 * Подключаем используемые хуки
+	 *
+	 * @return void
+	 */
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'Code_Highlighting::loadTheme', false, __FILE__);
-		add_integration_function('integrate_admin_areas', 'Code_Highlighting::adminAreas', false);
-		add_integration_function('integrate_modify_modifications', 'Code_Highlighting::modifyModifications', false, __FILE__);
-		add_integration_function('integrate_bbc_codes', 'Code_Highlighting::bbcCodes', false, __FILE__);
-		add_integration_function('integrate_buffer', 'Code_Highlighting::buffer', false, __FILE__);
+		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme', false, __FILE__);
+		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false, __FILE__);
+		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch', false, __FILE__);
+		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications', false, __FILE__);
+		add_integration_function('integrate_bbc_codes', __CLASS__ . '::bbcCodes', false, __FILE__);
+		add_integration_function('integrate_buffer', __CLASS__ . '::buffer', false, __FILE__);
 	}
 
-
+	/**
+	 * Подключаем скрипты и стили
+	 *
+	 * @return void
+	 */
 	public static function loadTheme()
 	{
 		global $modSettings, $context, $settings, $txt;
@@ -115,6 +125,12 @@ class Code_Highlighting
 			</script>';
 	}
 
+	/**
+	 * Создаем секцию с настройками мода в админке
+	 *
+	 * @param array $admin_areas
+	 * @return void
+	 */
 	public static function adminAreas(&$admin_areas)
 	{
 		global $txt;
@@ -122,12 +138,36 @@ class Code_Highlighting
 		$admin_areas['config']['areas']['modsettings']['subsections']['highlight'] = array($txt['ch_title']);
 	}
 
+	/**
+	 * Легкий доступ к настройкам мода через быстрый поиск в админке
+	 *
+	 * @param array $language_files
+	 * @param array $include_files
+	 * @param array $settings_search
+	 * @return void
+	 */
+	public static function adminSearch(&$language_files, &$include_files, &$settings_search)
+	{
+		$settings_search[] = array(__CLASS__ . '::settings', 'area=modsettings;sa=highlight');
+	}
+
+	/**
+	 * Подключаем вкладку с настройками мода
+	 *
+	 * @param actions $subActions
+	 * @return void
+	 */
 	public static function modifyModifications(&$subActions)
 	{
 		$subActions['highlight'] = array('Code_Highlighting', 'settings');
 	}
 
-	public static function settings()
+	/**
+	 * Определяем настройки мода
+	 *
+	 * @return array|void
+	 */
+	public static function settings($return_config = false)
 	{
 		global $context, $txt, $scripturl, $settings, $modSettings;
 
@@ -166,16 +206,28 @@ class Code_Highlighting
 		if (!empty($modSettings['ch_enable']) && function_exists('file_get_contents'))
 			$config_vars[] = array('callback', 'ch_example');
 
+		if ($return_config)
+			return $config_vars;
+
 		// Saving?
 		if (isset($_GET['save'])) {
 			checkSession();
-			saveDBSettings($config_vars);
+
+			$save_vars = $config_vars;
+			saveDBSettings($save_vars);
+
 			redirectexit('action=admin;area=modsettings;sa=highlight');
 		}
 
 		prepareDBSettingContext($config_vars);
 	}
 
+	/**
+	 * Изменяем оформление ББ-тега [code]
+	 *
+	 * @param array $codes
+	 * @return void
+	 */
 	public static function bbcCodes(&$codes)
 	{
 		global $modSettings, $txt, $context;
@@ -215,6 +267,12 @@ class Code_Highlighting
 			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2020, Bugo';
 	}
 
+	/**
+	 * Производим замены в буфере страницы
+	 *
+	 * @param array $buffer
+	 * @return void
+	 */
 	public static function buffer($buffer)
 	{
 		global $modSettings, $txt, $context, $settings;
@@ -234,7 +292,7 @@ class Code_Highlighting
 	}
 }
 
-// Example
+// Область предпросмотра
 function template_callback_ch_example()
 {
 	global $settings, $txt;
