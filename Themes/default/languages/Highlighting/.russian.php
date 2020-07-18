@@ -1,10 +1,11 @@
 <?php
 
 /**
- * .russian-utf8.php
+ * .russian.php
  *
  * @package Code Highlighting
  * @author Bugo https://dragomano.ru/mods/code-highlighting
+ *
  */
 
 $txt['ch_title']    = 'Подсветка синтаксиса';

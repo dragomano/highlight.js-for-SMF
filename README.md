@@ -1,8 +1,11 @@
 # Code Highlighting for SMF
+![SMF 2.1](https://img.shields.io/badge/SMF-2.1-blue.svg?style=flat&color=ed6033)
+![License](https://img.shields.io/github/license/dragomano/code-highlighting)
+
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/code-highlighting)
-* **License:** [BSD](https://opensource.org/licenses/BSD-3-Clause)
+* **License:** [BSD](https://github.com/dragomano/Code-Highlighting/blob/master/LICENSE)
 * **Compatible with:** SMF 2.1.x
-* **Tested on:** PHP 7.3+ / MariaDB 10.3+ / PostgreSQL 9.6+
+* **Tested on:** PHP 7.3.19
 * **Hooks only:** Yes
 * **Languages:** English, French, Russian, Spanish
 

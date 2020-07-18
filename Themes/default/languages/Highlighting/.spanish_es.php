@@ -1,7 +1,7 @@
 <?php
 
 /**
- * .spanish_latin.php
+ * .spanish_es.php
  *
  * @package Code Highlighting
  * @author Rock Lee - https://www.bombercode.org

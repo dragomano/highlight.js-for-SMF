@@ -1,11 +1,10 @@
 <?php
 
 /**
- * .french-utf8.php
+ * .french.php
  *
  * @package Code Highlighting
- * @author Bugo https://dragomano.ru/mods/code-highlighting
- * @French translation by Alex - https://chez-oim.org
+ * @author Alex - https://chez-oim.org
  *
  */
 

@@ -7,6 +7,7 @@
 	display: block;
 	font-family: "DejaVu Sans Mono", Monaco, Consolas, monospace;
 	white-space: pre-wrap;
+	overflow: hidden !important;
 }
 pre {
 	overflow: auto;
