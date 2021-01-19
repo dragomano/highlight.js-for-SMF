@@ -6,26 +6,27 @@
  * @package Code Highlighting
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/code-highlighting
- * @copyright 2010-2018 Bugo
+ * @copyright 2010-2021 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3
+ * @version 1.4
  */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-define('CH_VER', '9.12.0');
+define('CH_VER', '10');
 
 class Code_Highlighting
 {
 	public static function hooks()
 	{
-		add_integration_function('integrate_load_theme', 'Code_Highlighting::loadTheme', false);
-		add_integration_function('integrate_admin_areas', 'Code_Highlighting::adminAreas', false);
-		add_integration_function('integrate_modify_modifications', 'Code_Highlighting::modifyModifications', false);
-		add_integration_function('integrate_bbc_codes', 'Code_Highlighting::bbcCodes', false);
-		add_integration_function('integrate_buffer', 'Code_Highlighting::buffer', false);
+		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme', false);
+		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false);
+		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications', false);
+		add_integration_function('integrate_bbc_codes', __CLASS__ . '::bbcCodes', false);
+		add_integration_function('integrate_prepare_display_context', __CLASS__ . '::prepareDisplayContext', false);
+		add_integration_function('integrate_menu_buttons', __CLASS__ . '::addCredits', false);
 	}
 
 
@@ -35,27 +36,21 @@ class Code_Highlighting
 
 		loadLanguage('Highlighting/');
 
-		$addSettings = [];
-		if (!isset($modSettings['ch_enable']))
-			$addSettings['ch_enable'] = 1;
-		if (!isset($modSettings['ch_cdn_use']))
-			$addSettings['ch_cdn_use'] = 1;
-		if (!isset($modSettings['ch_style']))
-			$addSettings['ch_style'] = 'default';
-		if (!isset($modSettings['ch_tab']))
-			$addSettings['ch_tab'] = 4;
-		if (!isset($modSettings['ch_fontsize']))
-			$addSettings['ch_fontsize'] = 'medium';
-		if (!empty($addSettings))
-			updateSettings($addSettings);
+		if (empty($modSettings['ch_enable']))
+			return;
 
 		// Paths
-		$context['ch_jss_path'] = !empty($modSettings['ch_cdn_use']) ? '//cdnjs.cloudflare.com/ajax/libs/highlight.js/' . CH_VER . '/highlight.min.js' : $settings['default_theme_url'] . '/scripts/highlight.pack.js';
-		$context['ch_clb_path'] = !empty($modSettings['ch_cdn_use']) ? '//cdnjs.cloudflare.com/ajax/libs/clipboard.js/1.7.1/clipboard.min.js' : $settings['default_theme_url'] . '/scripts/clipboard.min.js';
-		$context['ch_css_path'] = !empty($modSettings['ch_cdn_use']) ? '//cdnjs.cloudflare.com/ajax/libs/highlight.js/' . CH_VER . '/styles/' . $modSettings['ch_style'] . '.min.css' : $settings['default_theme_url'] . '/css/highlight/' . $modSettings['ch_style'] . '.css';
-
-		if (isset($_REQUEST['sa']) && $_REQUEST['sa'] == 'showoperations')
-			return;
+		if (!empty($modSettings['ch_cdn_use'])) {
+			$context['ch_jss_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@' . CH_VER . '/build/highlight.min.js';
+			$context['ch_dln_path'] = 'https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2/dist/highlightjs-line-numbers.min.js';
+			$context['ch_clb_path'] = 'https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js';
+			$context['ch_css_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@' . CH_VER . '/build/styles/' . $modSettings['ch_style'] . '.min.css';
+		} else {
+			$context['ch_jss_path'] = $settings['default_theme_url'] . '/scripts/highlight.pack.js';
+			$context['ch_dln_path'] = $settings['default_theme_url'] . '/scripts/highlightjs-line-numbers.min.js';
+			$context['ch_clb_path'] = $settings['default_theme_url'] . '/scripts/clipboard.min.js';
+			$context['ch_css_path'] = $settings['default_theme_url'] . '/css/highlight/' . $modSettings['ch_style'] . '.css';
+		}
 
 		if (defined('WIRELESS') && WIRELESS)
 			return;
@@ -77,11 +72,13 @@ class Code_Highlighting
 
 			if (!in_array($context['current_action'], array('helpadmin', 'printpage')))
 				$context['insert_after_template'] .= '
-		<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>
-		<script src="' . $context['ch_clb_path'] . '"></script>
+		<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>' . (!empty($modSettings['ch_line_numbers']) ? '
+		<script type="text/javascript" src="' . $context['ch_dln_path'] . '"></script>' : '') . '
+		<script type="text/javascript" src="' . $context['ch_clb_path'] . '"></script>
 		<script type="text/javascript">
 			hljs.tabReplace = "' . $tab . '";
-			hljs.initHighlightingOnLoad();
+			hljs.initHighlightingOnLoad();' . (!empty($modSettings['ch_line_numbers']) ? '
+			hljs.initLineNumbersOnLoad();' : '') . '
 			window.addEventListener("load", function() {
 				var pre = document.getElementsByTagName("code");
 				for (var i = 0; i < pre.length; i++) {
@@ -93,9 +90,8 @@ class Code_Highlighting
 					divClipboard.appendChild(button);
 					pre[i].parentElement.insertBefore(divClipboard,pre[i]);
 				}
-				var btnClipboard = new Clipboard(".btn-clipboard", {
+				var btnClipboard = new ClipboardJS(".btn-clipboard", {
 					target: function(trigger) {
-						console.log(trigger.parentElement.nextElementSibling);
 						trigger.clearSelection;
 						return trigger.parentElement.nextElementSibling;
 					}
@@ -128,24 +124,38 @@ class Code_Highlighting
 
 	public static function modifyModifications(&$subActions)
 	{
-		$subActions['highlight'] = array('Code_Highlighting', 'settings');
+		$subActions['highlight'] = array(__CLASS__, 'settings');
 	}
 
 	public static function settings()
 	{
-		global $context, $txt, $scripturl, $settings, $modSettings;
+		global $context, $txt, $scripturl, $modSettings, $settings;
 
-		$context['page_title'] = $txt['ch_title'];
+		$context['page_title']     = $txt['ch_title'];
 		$context['settings_title'] = $txt['ch_settings'];
-		$context['post_url'] = $scripturl . '?action=admin;area=modsettings;save;sa=highlight';
+		$context['post_url']       = $scripturl . '?action=admin;area=modsettings;save;sa=highlight';
 		$context[$context['admin_menu_name']]['tab_data']['tabs']['highlight'] = array('description' => $txt['ch_desc']);
+
+		$addSettings = [];
+		if (!isset($modSettings['ch_enable']))
+			$addSettings['ch_enable'] = 1;
+		if (!isset($modSettings['ch_cdn_use']))
+			$addSettings['ch_cdn_use'] = 1;
+		if (!isset($modSettings['ch_style']))
+			$addSettings['ch_style'] = 'default';
+		if (!isset($modSettings['ch_tab']))
+			$addSettings['ch_tab'] = 4;
+		if (!isset($modSettings['ch_fontsize']))
+			$addSettings['ch_fontsize'] = 'medium';
+		if (!empty($addSettings))
+			updateSettings($addSettings);
 
 		$style_list = glob($settings['default_theme_dir'] . "/css/highlight/*.css");
 		$style_set  = array();
 		foreach ($style_list as $file) {
-			$search = array($settings['default_theme_dir'] . "/css/highlight/", '.css');
+			$search  = array($settings['default_theme_dir'] . "/css/highlight/", '.css');
 			$replace = array('', '');
-			$file = str_replace($search, $replace, $file);
+			$file    = str_replace($search, $replace, $file);
 			$style_set[$file] = ucwords(str_replace('-', ' ', $file));
 		}
 
@@ -164,7 +174,8 @@ class Code_Highlighting
 					'large'   => 'large',
 					'x-large' => 'x-large'
 				)
-			)
+			),
+			array('check', 'ch_line_numbers')
 		);
 
 		if (!empty($modSettings['ch_enable']) && function_exists('file_get_contents'))
@@ -182,7 +193,10 @@ class Code_Highlighting
 
 	public static function bbcCodes(&$codes)
 	{
-		global $modSettings, $txt, $context;
+		global $modSettings, $context, $txt;
+
+		if ((defined('WIRELESS') && WIRELESS) || empty($modSettings['ch_enable']) || $context['current_subaction'] == 'showoperations')
+			return;
 
 		if (!empty($modSettings['ch_enable'])) {
 			foreach ($codes as $tag => $dump) {
@@ -205,48 +219,57 @@ class Code_Highlighting
 			$codes[] = array(
 				'tag' => 'code',
 				'type' => 'unparsed_equals_content',
-				'validate' => function(&$tag, &$data, $disabled)
-				{
-					global $txt, $modSettings;
-					$tag['content'] = '<div class="codeheader">' . $txt['code'] . ': ' . $data[1] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code class="' . $data[1] . '">' . rtrim($data[0], "\n\r") . '</code></pre></div>';
+				'validate' => function(&$tag, &$data, $disabled) use ($txt, $modSettings) {
+					if (!isset($disabled['code'])) {
+						$tag['content'] = '<div class="codeheader">' . $txt['code'] . ': ' . $data[1] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code class="' . $data[1] . '">' . rtrim($data[0], "\n\r") . '</code></pre></div>';
+					}
 				},
 				'block_level' => true,
 				'disabled_content' => '<pre>$1</pre>'
 			);
 		}
-
-		// Copyright Info
-		if (isset($context['current_action']) && $context['current_action'] == 'credits')
-			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank">Code Highlighting</a> &copy; 2010&ndash;' . date('Y') . ', Bugo';
 	}
 
-	public static function buffer($buffer)
+	/**
+	 * Творим колдовство в сообщениях форума
+	 * Заменяем <br> на нормальный перенос строки, ради отображения нумерации строк
+	 *
+	 * @param array $output
+	 * @return void
+	 */
+	public static function prepareDisplayContext(&$output)
 	{
-		global $modSettings, $txt, $context, $settings;
+		global $modSettings;
 
-		$search = $replace = '';
+		if (empty($modSettings['ch_line_numbers']))
+			return;
 
-		if (!empty($modSettings['ch_enable']) && isset($txt['operation_title'])) {
-			$css = "\n\t\t" . '<link rel="stylesheet" type="text/css" href="' . $context['ch_css_path'] . '" />
-			<link rel="stylesheet" type="text/css" href="' . $settings['default_theme_url'] . '/css/highlight.css" />';
-			$js = "\n\t\t" . '<script type="text/javascript" src="' . $context['ch_jss_path'] . '"></script>
-			<script type="text/javascript">hljs.initHighlightingOnLoad();</script>';
-			$search = '<title>' . $txt['operation_title'] . '</title>';
-			$replace = $search . $css . $js;
-		}
+		if (strpos($output['body'], '<pre>') !== false)
+			$output['body'] = strtr($output['body'], array('<br />' => "\n"));
+	}
 
-		return (isset($_REQUEST['xml']) ? $buffer : str_replace($search, $replace, $buffer));
+	/**
+	 * Добавляем информацию об авторских правах
+	 *
+	 * @return void
+	 */
+	public static function addCredits()
+	{
+		global $context;
+
+		if ($context['current_action'] == 'credits')
+			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
 	}
 }
 
 // Example
 function template_callback_ch_example()
 {
-	global $settings, $txt;
+	global $settings, $txt, $modSettings;
 
 	if (file_exists($settings['default_theme_dir'] . '/css/admin.css'))	{
 		$file = file_get_contents($settings['default_theme_dir'] . '/css/admin.css');
-		$file = parse_bbc('[code]' . $file . '[/code]');
-		echo '</dl><strong>' . $txt['ch_example'] . '</strong>' . $file . '<dl><dt></dt><dd></dd>';
+
+		echo '</dl><strong>' . $txt['ch_example'] . '</strong><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code>' . $file . '</code></pre></div><dl><dt></dt><dd></dd>';
 	}
 }

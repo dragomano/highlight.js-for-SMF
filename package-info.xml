@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:Highlighting</id>
 	<name>Code Highlighting</name>
-	<version>1.3</version>
+	<version>1.4</version>
 	<type>modification</type>
 
 	<install for="2.0 - 2.0.99">
@@ -20,6 +20,7 @@
 		<code>hooks.php</code>
 		<remove-file name="$sourcedir/Class-Highlighting.php" />
 		<remove-file name="$themedir/scripts/highlight.pack.js" />
+		<remove-file name="$themedir/scripts/highlightjs-line-numbers.min.js" />
 		<remove-file name="$themedir/scripts/clipboard.min.js" />
 		<remove-file name="$themedir/images/clippy.svg" />
 		<remove-file name="$themedir/css/highlight.css" />
