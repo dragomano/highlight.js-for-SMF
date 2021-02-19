@@ -5,6 +5,6 @@
 It is very easy to use because it works automatically: finds blocks of code, detects a language, highlights it.
 Supported languages: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash etc.[/color]
 
-This uses a [url=https://highlightjs.org]highlight.js[/url] script.
+This mod uses scripts of Ivan Sagalaev [url=https://highlightjs.org]highlight.js[/url] and Yauheni Pakala [url=https://github.com/wcoder/highlightjs-line-numbers.js]highlightjs-line-numbers.js[/url].
 
 [b][size=11pt]Highlight.js is released under the BSD License[/size][/b][/center]

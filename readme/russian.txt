@@ -1,9 +1,9 @@
 [center][color=red][size=16pt][b]Code Highlighting[/b][/size][/color]
 [color=blue][b][size=10pt]By Bugo[/size][/b][/color]
 
-[color=green]Подсветка с автоматическим определением используемого языка, а также с возможностью выбора стиля оформления.
-Поддерживаемые языки: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash и многие другие.[/color]
+[color=green]ѕодсветка с автоматическим определением используемого €зыка, а также с возможностью выбора стил€ оформлени€.
+ѕоддерживаемые €зыки: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash и многие другие.[/color]
 
-Используется скрипт [url=https://highlightjs.org]highlight.js[/url].
+»спользуютс€ скрипты »вана —агалаева [url=https://highlightjs.org]highlight.js[/url] и ≈вгени€ ѕакало [url=https://github.com/wcoder/highlightjs-line-numbers.js]highlightjs-line-numbers.js[/url]
 
-[b][size=11pt]Highlight.js распространяется на условиях лицензии BSD[/size][/b][/center]
+[b][size=11pt]Highlight.js распростран€етс€ на услови€х лицензии BSD[/size][/b][/center]
