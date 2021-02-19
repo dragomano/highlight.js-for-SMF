@@ -9,7 +9,7 @@
  * @copyright 2010-2021 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 0.8
+ * @version 0.8.1
  */
 
 if (!defined('SMF'))
@@ -256,9 +256,11 @@ class Code_Highlighting
 		$codes[] = array(
 			'tag' => 'code',
 			'type' => 'unparsed_equals_content',
-			'validate' => function(&$tag, &$data, $disabled) use ($txt, $modSettings) {
+			'content' => '<figure class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><figcaption class="codeheader">' . $txt['code'] . ': $2</figcaption><pre><code class="language-$2">$1</code></pre></figure>',
+			'validate' => function(&$tag, &$data, $disabled) {
 				if (!isset($disabled['code'])) {
-					$tag['content'] = '<figure class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><figcaption class="codeheader">' . $txt['code'] . ': ' . $data[1] . '</figcaption><pre><code class="' . $data[1] . '">' . rtrim($data[0], "\n\r") . '</code></pre></figure>';
+					$data[0] = rtrim($data[0], "\n\r");
+					$data[1] = strtolower($data[1]);
 				}
 			},
 			'block_level' => true,
@@ -277,7 +279,7 @@ class Code_Highlighting
 	{
 		global $modSettings;
 
-		if (empty($modSettings['ch_line_numbers']))
+		if (empty($modSettings['ch_enable']) || empty($modSettings['ch_line_numbers']))
 			return;
 
 		if (strpos($output['body'], '<pre>') !== false)
@@ -291,9 +293,14 @@ class Code_Highlighting
 	 */
 	public static function credits()
 	{
-		global $context;
+		global $modSettings, $context;
 
-		$context['credits_modifications'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
+		if (empty($modSettings['ch_enable']))
+			return;
+
+		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/code-highlighting' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
+
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
 	}
 }
 
