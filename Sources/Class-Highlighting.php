@@ -9,7 +9,7 @@
  * @copyright 2010-2021 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.4
+ * @version 1.4.1
  */
 
 if (!defined('SMF'))
@@ -207,7 +207,7 @@ class Code_Highlighting
 			$codes[] = 	array(
 				'tag' => 'code',
 				'type' => 'unparsed_content',
-				'content' => '<div class="codeheader">' . $txt['code'] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code>$1</code></pre></div>',
+				'content' => '<div class="codeheader">' . $txt['code'] . '</div><div class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><pre><code>$1</code></pre></div>',
 				'validate' => function(&$tag, &$data, $disabled)
 				{
 					if (!isset($disabled['code']))
@@ -219,9 +219,11 @@ class Code_Highlighting
 			$codes[] = array(
 				'tag' => 'code',
 				'type' => 'unparsed_equals_content',
-				'validate' => function(&$tag, &$data, $disabled) use ($txt, $modSettings) {
+				'content' => '<div class="codeheader">' . $txt['code'] . ': $2</div><div class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><pre><code class="language-$2">$1</code></pre></div>',
+				'validate' => function(&$tag, &$data, $disabled) {
 					if (!isset($disabled['code'])) {
-						$tag['content'] = '<div class="codeheader">' . $txt['code'] . ': ' . $data[1] . '</div><div class="block_code" style="font-size: ' . $modSettings['ch_fontsize'] . '"><pre><code class="' . $data[1] . '">' . rtrim($data[0], "\n\r") . '</code></pre></div>';
+						$data[0] = rtrim($data[0], "\n\r");
+						$data[1] = strtolower($data[1]);
 					}
 				},
 				'block_level' => true,
@@ -255,10 +257,17 @@ class Code_Highlighting
 	 */
 	public static function addCredits()
 	{
-		global $context;
+		global $modSettings, $context;
+
+		if (empty($modSettings['ch_enable']))
+			return;
+
+		$link = in_array($context['user']['language'], array('russian','russian-utf8'))
+			? 'https://dragomano.ru/mods/code-highlighting'
+			: 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
 		if ($context['current_action'] == 'credits')
-			$context['copyrights']['mods'][] = '<a href="https://dragomano.ru/mods/code-highlighting" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
+			$context['copyrights']['mods'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
 	}
 }
 
