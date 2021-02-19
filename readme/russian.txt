@@ -4,6 +4,6 @@
 [color=green]Подсветка с автоматическим определением используемого языка, а также с возможностью выбора стиля оформления.
 Поддерживаемые языки: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash и многие другие.[/color]
 
-Используется скрипт [url=https://highlightjs.org]highlight.js[/url].
+Используются скрипты Ивана Сагалаева [url=https://highlightjs.org]highlight.js[/url] и Евгения Пакало [url=https://github.com/wcoder/highlightjs-line-numbers.js]highlightjs-line-numbers.js[/url]
 
 [b][size=11pt]Highlight.js распространяется на условиях лицензии BSD[/size][/b][/center]

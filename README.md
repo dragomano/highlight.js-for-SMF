@@ -5,7 +5,7 @@
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/code-highlighting)
 * **License:** [BSD](https://github.com/dragomano/Code-Highlighting/blob/master/LICENSE)
 * **Compatible with:** SMF 2.1.x
-* **Tested on:** PHP 7.3.26, 7.4.14
+* **Tested on:** PHP 7.3.27, 7.4.15
 * **Hooks only:** Yes
 * **Languages:** English, French, Russian, Spanish
 
@@ -14,7 +14,7 @@ This script highlights syntax in code examples on your forum.
 It is very easy to use because it works automatically: finds blocks of code, detects a language, highlights it.
 Supported languages: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash etc.
 
-This uses a [highlight.js](https://highlightjs.org) script.
+This mod uses scripts of Ivan Sagalaev [highlight.js](https://highlightjs.org) and Yauheni Pakala [highlightjs-line-numbers.js](https://github.com/wcoder/highlightjs-line-numbers.js).
 
 Highlight.js is released under the BSD License.
 
@@ -24,6 +24,6 @@ Highlight.js is released under the BSD License.
 Подсветка с автоматическим определением используемого языка, а также с возможностью выбора стиля оформления.
 Поддерживаемые языки: HTML/XML, Javascript, CSS, PHP, Ruby, Perl, Python, C++, C#, Java, SQL, Bash и многие другие.
 
-Используется скрипт [highlight.js](https://highlightjs.org).
+Используются скрипты Ивана Сагалаева [highlight.js](https://highlightjs.org) и Евгения Пакало [highlightjs-line-numbers.js](https://github.com/wcoder/highlightjs-line-numbers.js).
 
 Highlight.js распространяется на условиях лицензии BSD.
