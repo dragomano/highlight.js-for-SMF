@@ -3,7 +3,7 @@
 /**
  * .french.php
  *
- * @package Code Highlighting
+ * @package Code Highlighting (Highlight.js for SMF)
  * @author Alex - https://chez-oim.org
  *
  */
@@ -14,7 +14,6 @@ $txt['ch_desc']     = 'Ici, vous pouvez activer/désactiver la mise en surbrilla
 $txt['ch_enable']   = 'Activer la coloration syntaxique';
 $txt['ch_cdn_use']  = 'Utiliser un CDN pour charger les scripts et styles';
 $txt['ch_style']    = 'Style de la coloration syntaxique';
-$txt['ch_tab']      = 'Nombre d\'espaces pour les tabulations (indentation)';
 $txt['ch_fontsize'] = 'Taille des caractères';
 $txt['ch_example']  = 'Exemple';
 $txt['ch_copy']     = 'Copier';

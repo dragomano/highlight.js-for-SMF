@@ -9,7 +9,7 @@
  * @copyright 2010-2021 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 0.8.1
+ * @version 0.9
  */
 
 if (!defined('SMF'))
@@ -17,7 +17,7 @@ if (!defined('SMF'))
 
 define('CH_VER', '10');
 
-class Code_Highlighting
+class Highlighting
 {
 	/**
 	 * Подключаем используемые хуки
@@ -27,11 +27,12 @@ class Code_Highlighting
 	public static function hooks()
 	{
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme', false, __FILE__);
+		add_integration_function('integrate_buffer', __CLASS__ . '::buffer', false, __FILE__);
+		add_integration_function('integrate_bbc_codes', __CLASS__ . '::bbcCodes', false, __FILE__);
+		add_integration_function('integrate_prepare_display_context', __CLASS__ . '::prepareDisplayContext', false, __FILE__);
 		add_integration_function('integrate_admin_areas', __CLASS__ . '::adminAreas', false, __FILE__);
 		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch', false, __FILE__);
 		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications', false, __FILE__);
-		add_integration_function('integrate_bbc_codes', __CLASS__ . '::bbcCodes', false, __FILE__);
-		add_integration_function('integrate_prepare_display_context', __CLASS__ . '::prepareDisplayContext', false, __FILE__);
 		add_integration_function('integrate_credits', __CLASS__ . '::credits', false, __FILE__);
 	}
 
@@ -46,7 +47,10 @@ class Code_Highlighting
 
 		loadLanguage('Highlighting/');
 
-		if (empty($modSettings['ch_enable']))
+		if (empty($modSettings['ch_enable']) || empty($modSettings['ch_style']))
+			return;
+
+		if (in_array($context['current_action'], array('helpadmin', 'printpage')))
 			return;
 
 		// Paths
@@ -63,27 +67,16 @@ class Code_Highlighting
 		}
 
 		// Highlight
-		$i = 0;
-		$tab = '';
-		if (!empty($modSettings['ch_tab'])) {
-			while ($i < $modSettings['ch_tab']) {
-				$tab .= ' ';
-				$i++;
-			}
-		}
-
 		$context['html_headers'] .= '
 	<link rel="stylesheet" href="' . $context['ch_css_path'] . '">
 	<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
 
-		if (!in_array($context['current_action'], array('helpadmin', 'printpage')))
-			$context['insert_after_template'] .= '
+		$context['insert_after_template'] .= '
 		<script src="' . $context['ch_jss_path'] . '"></script>' . (!empty($modSettings['ch_line_numbers']) ? '
 		<script src="' . $context['ch_dln_path'] . '"></script>' : '') . '
 		<script src="' . $context['ch_clb_path'] . '"></script>
 		<script>
-			hljs.tabReplace = "' . $tab . '";
-			hljs.initHighlightingOnLoad();' . (!empty($modSettings['ch_line_numbers']) ? '
+			hljs.highlightAll();' . (!empty($modSettings['ch_line_numbers']) ? '
 			hljs.initLineNumbersOnLoad();' : '') . '
 			window.addEventListener("load", function() {
 				let pre = document.getElementsByTagName("code");
@@ -107,6 +100,95 @@ class Code_Highlighting
 				});
 			});
 		</script>';
+	}
+
+	/**
+	 * Подгружаем стили для оформления операций замен при установке/удалении модификаций
+	 *
+	 * @param string $buffer
+	 * @return string
+	 */
+	public static function buffer($buffer)
+	{
+		global $context, $modSettings, $txt, $settings;
+
+		if (empty($context['ch_css_path']))
+			return $buffer;
+
+		$search = $replace = '';
+
+		if (!empty($modSettings['ch_enable']) && isset($txt['operation_title'])) {
+			$css = "\n\t\t" . '<link rel="stylesheet" href="' . $context['ch_css_path'] . '">
+		<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
+			$search = '<title>' . $txt['operation_title'] . '</title>';
+			$replace = $search . $css;
+		}
+
+		return (isset($_REQUEST['xml']) ? $buffer : str_replace($search, $replace, $buffer));
+	}
+
+	/**
+	 * Изменяем оформление ББ-тега [code]
+	 *
+	 * @param array $codes
+	 * @return void
+	 */
+	public static function bbcCodes(&$codes)
+	{
+		global $modSettings, $txt;
+
+		if (SMF === 'BACKGROUND' || empty($modSettings['ch_enable']))
+			return;
+
+		foreach ($codes as $tag => $dump) {
+			if ($dump['tag'] == 'code')
+				unset($codes[$tag]);
+		}
+
+		$codes[] = 	array(
+			'tag' => 'code',
+			'type' => 'unparsed_content',
+			'content' => '<figure class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><pre><code>$1</code></pre></figure>',
+			'validate' => function(&$tag, &$data, $disabled) {
+				if (!isset($disabled['code'])) {
+					$data = rtrim($data, "\n\r");
+				}
+			},
+			'block_level' => true,
+			'disabled_content' => '<pre>$1</pre>'
+		);
+
+		$codes[] = array(
+			'tag' => 'code',
+			'type' => 'unparsed_equals_content',
+			'content' => '<figure class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><figcaption class="codeheader">' . $txt['code'] . ': $2</figcaption><pre><code class="language-$2">$1</code></pre></figure>',
+			'validate' => function(&$tag, &$data, $disabled) {
+				if (!isset($disabled['code'])) {
+					$data[0] = rtrim($data[0], "\n\r");
+					$data[1] = strtolower($data[1]);
+				}
+			},
+			'block_level' => true,
+			'disabled_content' => '<pre>$1</pre>'
+		);
+	}
+
+	/**
+	 * Творим колдовство в сообщениях форума
+	 * Заменяем <br> на нормальный перенос строки, ради отображения нумерации строк
+	 *
+	 * @param array $output
+	 * @return void
+	 */
+	public static function prepareDisplayContext(&$output)
+	{
+		global $modSettings;
+
+		if (empty($modSettings['ch_enable']) || empty($modSettings['ch_line_numbers']))
+			return;
+
+		if (strpos($output['body'], '<pre>') !== false)
+			$output['body'] = strtr($output['body'], array('<br>' => "\n"));
 	}
 
 	/**
@@ -167,8 +249,6 @@ class Code_Highlighting
 			$addSettings['ch_cdn_use'] = 1;
 		if (!isset($modSettings['ch_style']))
 			$addSettings['ch_style'] = 'default';
-		if (!isset($modSettings['ch_tab']))
-			$addSettings['ch_tab'] = 4;
 		if (!isset($modSettings['ch_fontsize']))
 			$addSettings['ch_fontsize'] = 'medium';
 		if (!empty($addSettings))
@@ -187,7 +267,6 @@ class Code_Highlighting
 			array('check', 'ch_enable'),
 			array('check', 'ch_cdn_use'),
 			array('select', 'ch_style', $style_set),
-			array('int', 'ch_tab'),
 			array(
 				'select',
 				'ch_fontsize',
@@ -221,69 +300,6 @@ class Code_Highlighting
 		}
 
 		prepareDBSettingContext($config_vars);
-	}
-
-	/**
-	 * Изменяем оформление ББ-тега [code]
-	 *
-	 * @param array $codes
-	 * @return void
-	 */
-	public static function bbcCodes(&$codes)
-	{
-		global $modSettings, $txt, $context;
-
-		if (SMF === 'BACKGROUND' || empty($modSettings['ch_enable']) || $context['current_subaction'] == 'showoperations')
-			return;
-
-		foreach ($codes as $tag => $dump) {
-			if ($dump['tag'] == 'code')
-				unset($codes[$tag]);
-		}
-
-		$codes[] = 	array(
-			'tag' => 'code',
-			'type' => 'unparsed_content',
-			'content' => '<figure class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><pre><code>$1</code></pre></figure>',
-			'validate' => function(&$tag, &$data, $disabled) {
-				if (!isset($disabled['code'])) {
-					$data = rtrim($data, "\n\r");
-				}
-			},
-			'block_level' => true,
-			'disabled_content' => '<pre>$1</pre>'
-		);
-		$codes[] = array(
-			'tag' => 'code',
-			'type' => 'unparsed_equals_content',
-			'content' => '<figure class="block_code"' . (!empty($modSettings['ch_fontsize']) ? ' style="font-size: ' . $modSettings['ch_fontsize'] . '"' : '') . '><figcaption class="codeheader">' . $txt['code'] . ': $2</figcaption><pre><code class="language-$2">$1</code></pre></figure>',
-			'validate' => function(&$tag, &$data, $disabled) {
-				if (!isset($disabled['code'])) {
-					$data[0] = rtrim($data[0], "\n\r");
-					$data[1] = strtolower($data[1]);
-				}
-			},
-			'block_level' => true,
-			'disabled_content' => '<pre>$1</pre>'
-		);
-	}
-
-	/**
-	 * Творим колдовство в сообщениях форума
-	 * Заменяем <br> на нормальный перенос строки, ради отображения нумерации строк
-	 *
-	 * @param array $output
-	 * @return void
-	 */
-	public static function prepareDisplayContext(&$output)
-	{
-		global $modSettings;
-
-		if (empty($modSettings['ch_enable']) || empty($modSettings['ch_line_numbers']))
-			return;
-
-		if (strpos($output['body'], '<pre>') !== false)
-			$output['body'] = strtr($output['body'], array('<br>' => "\n"));
 	}
 
 	/**
