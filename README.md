@@ -5,7 +5,7 @@
 * **Author:** Bugo [dragomano.ru](https://dragomano.ru/mods/code-highlighting)
 * **License:** [BSD](https://github.com/dragomano/Code-Highlighting/blob/master/LICENSE)
 * **Compatible with:** SMF 2.1.x
-* **Tested on:** PHP 7.4.16
+* **Tested on:** PHP 7.4.23
 * **Hooks only:** Yes
 * **Languages:** English, French, Russian, Spanish
 
