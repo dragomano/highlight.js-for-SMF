@@ -10,7 +10,7 @@ if (!empty($context['uninstalling']))
 
 $hooks = array(
 	'integrate_pre_include' => '$sourcedir/Class-Highlighting.php',
-	'integrate_pre_load'    => 'Code_Highlighting::hooks'
+	'integrate_pre_load'    => 'Highlighting::hooks'
 );
 
 if (!empty($context['uninstalling']))

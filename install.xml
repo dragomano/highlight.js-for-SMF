@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<!DOCTYPE modification SYSTEM "http://www.simplemachines.org/xml/modification">
+<modification xmlns="http://www.simplemachines.org/xml/modification" xmlns:smf="http://www.simplemachines.org/">
+	<id>Bugo:Highlighting</id>
+
+	<file name="$sourcedir/Subs.php">
+		<operation>
+			<search position="after"><![CDATA[
+	// Cache the output if it took some time...
+]]></search>
+			<add><![CDATA[
+	// Allow mods access to what parse_bbc created
+	call_integration_hook('integrate_ch_post_parsebbc', array(&$message, &$smileys, &$cache_id, &$parse_tags));
+]]></add>
+		</operation>
+	</file>
+
+</modification>

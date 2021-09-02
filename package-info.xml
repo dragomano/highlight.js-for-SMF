@@ -3,13 +3,14 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:Highlighting</id>
 	<name>Code Highlighting</name>
-	<version>1.4.1</version>
+	<version>1.5</version>
 	<type>modification</type>
 
 	<install for="2.0 - 2.0.99">
 		<readme parsebbc="true" lang="russian-utf8">readme/russian-utf8.txt</readme>
 		<readme parsebbc="true" lang="russian">readme/russian.txt</readme>
 		<readme parsebbc="true">readme/readme.txt</readme>
+		<modification>install.xml</modification>
 		<require-dir name="Themes" destination="$boarddir" />
 		<require-dir name="Sources" destination="$boarddir" />
 		<code>hooks.php</code>
@@ -18,8 +19,9 @@
 
 	<uninstall for="2.0 - 2.0.99">
 		<code>hooks.php</code>
+		<modification reverse="true">install.xml</modification>
 		<remove-file name="$sourcedir/Class-Highlighting.php" />
-		<remove-file name="$themedir/scripts/highlight.pack.js" />
+		<remove-file name="$themedir/scripts/highlight.min.js" />
 		<remove-file name="$themedir/scripts/highlightjs-line-numbers.min.js" />
 		<remove-file name="$themedir/scripts/clipboard.min.js" />
 		<remove-file name="$themedir/images/clippy.svg" />
