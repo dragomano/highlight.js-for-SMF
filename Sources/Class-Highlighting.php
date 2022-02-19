@@ -6,16 +6,16 @@
  * @package Code Highlighting
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/code-highlighting
- * @copyright 2010-2021 Bugo
+ * @copyright 2010-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.0
+ * @version 1.1
  */
 
 if (!defined('SMF'))
 	die('Hacking attempt...');
 
-class Highlighting
+final class Highlighting
 {
 	private const FONTSIZE_SET = [
 		'x-small' => 'x-small',
@@ -32,6 +32,7 @@ class Highlighting
 	 */
 	public function hooks()
 	{
+		add_integration_function('integrate_pre_css_output', __CLASS__ . '::preCssOutput#', false, __FILE__);
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
 		add_integration_function('integrate_bbc_codes', __CLASS__ . '::bbcCodes#', false, __FILE__);
 		add_integration_function('integrate_post_parsebbc', __CLASS__ . '::postParseBbc#', false, __FILE__);
@@ -39,6 +40,19 @@ class Highlighting
 		add_integration_function('integrate_admin_search', __CLASS__ . '::adminSearch#', false, __FILE__);
 		add_integration_function('integrate_modify_modifications', __CLASS__ . '::modifyModifications#', false, __FILE__);
 		add_integration_function('integrate_credits', __CLASS__ . '::credits#', false, __FILE__);
+	}
+
+	/**
+	 * @hook integrate_pre_css_output
+	 */
+	public function preCssOutput()
+	{
+		global $modSettings;
+
+		if (! $this->shouldItWork() || empty($modSettings['ch_cdn_use']))
+			return;
+
+		echo "\n\t" . '<link rel="preload" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/' . ($modSettings['ch_style'] ?? 'default') . '.min.css" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">';
 	}
 
 	/**
@@ -52,10 +66,7 @@ class Highlighting
 
 		loadLanguage('Highlighting/');
 
-		if (empty($modSettings['ch_enable']) || $context['current_subaction'] == 'showoperations')
-			return;
-
-		if (in_array($context['current_action'], array('helpadmin', 'printpage')))
+		if (! $this->shouldItWork())
 			return;
 
 		// Paths
@@ -63,17 +74,16 @@ class Highlighting
 			$context['ch_jss_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js';
 			$context['ch_dln_path'] = 'https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2/dist/highlightjs-line-numbers.min.js';
 			$context['ch_clb_path'] = 'https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js';
-			$context['ch_css_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/' . ($modSettings['ch_style'] ?? 'default') . '.min.css';
 		} else {
 			$context['ch_jss_path'] = $settings['default_theme_url'] . '/scripts/highlight.min.js';
 			$context['ch_dln_path'] = $settings['default_theme_url'] . '/scripts/highlightjs-line-numbers.min.js';
 			$context['ch_clb_path'] = $settings['default_theme_url'] . '/scripts/clipboard.min.js';
-			$context['ch_css_path'] = $settings['default_theme_url'] . '/css/highlight/' . ($modSettings['ch_style'] ?? 'default') . '.min.css';
+
+			loadCSSFile('highlight/' . ($modSettings['ch_style'] ?? 'default') . '.min.css');
 		}
 
 		// Load styles and scripts
-		$context['html_headers'] .= "\n\t" . '<link rel="stylesheet" href="' . $context['ch_css_path'] . '">';
-		$context['html_headers'] .= "\n\t" . '<link rel="stylesheet" href="' . $settings['default_theme_url'] . '/css/highlight.css">';
+		loadCSSFile('highlight.css');
 
 		$context['insert_after_template'] .= '
 		<script src="' . $context['ch_jss_path'] . '"></script>' . (!empty($modSettings['ch_line_numbers']) ? '
@@ -116,26 +126,16 @@ class Highlighting
 	{
 		global $modSettings, $context, $txt;
 
-		if (SMF === 'BACKGROUND' || empty($modSettings['ch_enable']) || $context['current_subaction'] == 'showoperations')
+		if (! $this->shouldItWork())
 			return;
-
-		$disabled = [];
-		if (!empty($modSettings['disabledBBC'])) {
-			foreach (explode(',', $modSettings['disabledBBC']) as $tag)
-				$disabled[$tag] = true;
-		}
-
-		if (isset($disabled['code']))
-			return;
-
-		foreach ($codes as $tag => $dump) {
-			if ($dump['tag'] == 'code')
-				unset($codes[$tag]);
-		}
 
 		if (!empty($modSettings['ch_fontsize'])) {
 			$fontSize = ' style="font-size: ' . $modSettings['ch_fontsize'] . '"';
 		}
+
+		$codes = array_filter($codes, function ($code) {
+			return $code['tag'] !== 'code';
+		});
 
 		$codes[] = 	array(
 			'tag' => 'code',
@@ -160,7 +160,7 @@ class Highlighting
 	{
 		global $modSettings;
 
-		if (empty($modSettings['ch_enable']) || strpos($message, '<pre') === false)
+		if (! $this->shouldItWork() || strpos($message, '<pre') === false)
 			return;
 
 		$message = preg_replace_callback('~<pre(.*?)>(.*?)<\/pre>~si', function ($matches) {
@@ -285,6 +285,22 @@ class Highlighting
 		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/code-highlighting' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
 		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
+	}
+
+	/**
+	 * @return bool
+	 */
+	private function shouldItWork()
+	{
+		global $modSettings, $context;
+
+		if (SMF === 'BACKGROUND' || SMF === 'SSI' || empty($modSettings['enableBBC']) || empty($modSettings['ch_enable']))
+			return false;
+
+		if (in_array($context['current_action'], array('helpadmin', 'printpage')) || $context['current_subaction'] === 'showoperations')
+			return false;
+
+		return empty($modSettings['disabledBBC']) || !in_array('code', explode(',', $modSettings['disabledBBC']));
 	}
 }
 

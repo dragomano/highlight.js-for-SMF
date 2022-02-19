@@ -2,8 +2,8 @@
 <!DOCTYPE package-info SYSTEM "http://www.simplemachines.org/xml/package-info">
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:Highlighting</id>
-	<name>Code Highlighting</name>
-	<version>1.0</version>
+	<name>highlight.js for SMF</name>
+	<version>1.1</version>
 	<type>modification</type>
 
 	<install for="2.1.*">
