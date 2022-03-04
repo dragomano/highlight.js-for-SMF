@@ -3,33 +3,29 @@
 /**
  * Class-Highlighting.php
  *
- * @package Code Highlighting
+ * @package highlight.js for SMF
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
- * @author Bugo https://dragomano.ru/mods/code-highlighting
+ * @author Bugo https://dragomano.ru/mods/highlight.js-for-smf
  * @copyright 2010-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.1
+ * @version 1.2
  */
 
 if (!defined('SMF'))
-	die('Hacking attempt...');
+	die('No direct access...');
 
 final class Highlighting
 {
 	private const FONTSIZE_SET = [
 		'x-small' => 'x-small',
+		'smaller' => 'smaller',
 		'small'   => 'small',
 		'medium'  => 'medium',
 		'large'   => 'large',
 		'x-large' => 'x-large'
 	];
 
-	/**
-	 * Подключаем используемые хуки
-	 *
-	 * @return void
-	 */
 	public function hooks()
 	{
 		add_integration_function('integrate_pre_css_output', __CLASS__ . '::preCssOutput#', false, __FILE__);
@@ -55,11 +51,6 @@ final class Highlighting
 		echo "\n\t" . '<link rel="preload" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/' . ($modSettings['ch_style'] ?? 'default') . '.min.css" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">';
 	}
 
-	/**
-	 * Подключаем скрипты и стили
-	 *
-	 * @return void
-	 */
 	public function loadTheme()
 	{
 		global $modSettings, $context, $settings, $txt;
@@ -69,7 +60,6 @@ final class Highlighting
 		if (! $this->shouldItWork())
 			return;
 
-		// Paths
 		if (!empty($modSettings['ch_cdn_use'])) {
 			$context['ch_jss_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js';
 			$context['ch_dln_path'] = 'https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2/dist/highlightjs-line-numbers.min.js';
@@ -82,7 +72,6 @@ final class Highlighting
 			loadCSSFile('highlight/' . ($modSettings['ch_style'] ?? 'default') . '.min.css');
 		}
 
-		// Load styles and scripts
 		loadCSSFile('highlight.css');
 
 		$context['insert_after_template'] .= '
@@ -116,15 +105,9 @@ final class Highlighting
 		</script>';
 	}
 
-	/**
-	 * Изменяем оформление ББ-тега [code]
-	 *
-	 * @param array $codes
-	 * @return void
-	 */
-	public function bbcCodes(&$codes)
+	public function bbcCodes(array &$codes)
 	{
-		global $modSettings, $context, $txt;
+		global $modSettings, $txt;
 
 		if (! $this->shouldItWork())
 			return;
@@ -140,7 +123,11 @@ final class Highlighting
 		$codes[] = 	array(
 			'tag' => 'code',
 			'type' => 'unparsed_content',
-			'content' => '<figure class="block_code"' . ($fontSize ?? '') . '><pre><code>$1</code></pre></figure>',
+			'parameters' => array(
+				'lang' => array('optional' => true, 'value' => ' class="language-$1"'),
+				'start' => array('optional' => true, 'match' => '(\d+)', 'value' => ' data-ln-start-from="$1"'),
+			),
+			'content' => '<figure class="block_code"' . ($fontSize ?? '') . '><pre><code{lang}{start}>$1</code></pre></figure>',
 			'block_level' => true
 		);
 
@@ -152,62 +139,37 @@ final class Highlighting
 		);
 	}
 
-	/**
-	 * @param string $message
-	 * @return void
-	 */
-	public function postParseBbc(&$message)
+	public function postParseBbc(string &$message)
 	{
-		global $modSettings;
-
 		if (! $this->shouldItWork() || strpos($message, '<pre') === false)
 			return;
 
 		$message = preg_replace_callback('~<pre(.*?)>(.*?)<\/pre>~si', function ($matches) {
-			return str_replace('<br>', "\n", $matches[0]);
+			$result = str_replace(['<br>', '<br />'], PHP_EOL, $matches[0]);
+			$result = preg_replace('/\s*(<\/code>)/', PHP_EOL . '${1}', $result);
+			$result = preg_replace('/(<code[^>]*>)\s*/', PHP_EOL . '${1}', $result);
+			return $result;
 		}, $message);
 	}
 
-	/**
-	 * Создаем секцию с настройками мода в админке
-	 *
-	 * @param array $admin_areas
-	 * @return void
-	 */
-	public function adminAreas(&$admin_areas)
+	public function adminAreas(array &$admin_areas)
 	{
 		global $txt;
 
 		$admin_areas['config']['areas']['modsettings']['subsections']['highlight'] = array($txt['ch_title']);
 	}
 
-	/**
-	 * Легкий доступ к настройкам мода через быстрый поиск в админке
-	 *
-	 * @param array $language_files
-	 * @param array $include_files
-	 * @param array $settings_search
-	 * @return void
-	 */
-	public function adminSearch(&$language_files, &$include_files, &$settings_search)
+	public function adminSearch(array &$language_files, array &$include_files, array &$settings_search)
 	{
 		$settings_search[] = array(array($this, 'settings'), 'area=modsettings;sa=highlight');
 	}
 
-	/**
-	 * Подключаем вкладку с настройками мода
-	 *
-	 * @param array $subActions
-	 * @return void
-	 */
-	public function modifyModifications(&$subActions)
+	public function modifyModifications(array &$subActions)
 	{
 		$subActions['highlight'] = array($this, 'settings');
 	}
 
 	/**
-	 * Определяем настройки мода
-	 *
 	 * @return array|void
 	 */
 	public function settings($return_config = false)
@@ -270,11 +232,6 @@ final class Highlighting
 		prepareDBSettingContext($config_vars);
 	}
 
-	/**
-	 * Подключаем копирайты мода
-	 *
-	 * @return void
-	 */
 	public function credits()
 	{
 		global $modSettings, $context;
@@ -284,13 +241,10 @@ final class Highlighting
 
 		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/code-highlighting' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">Code Highlighting</a> &copy; 2010&ndash;2021, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2021, Bugo';
 	}
 
-	/**
-	 * @return bool
-	 */
-	private function shouldItWork()
+	private function shouldItWork(): bool
 	{
 		global $modSettings, $context;
 
@@ -304,11 +258,6 @@ final class Highlighting
 	}
 }
 
-/**
- * Область предпросмотра
- *
- * @return void
- */
 function template_callback_ch_example()
 {
 	global $settings, $txt;
