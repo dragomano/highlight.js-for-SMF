@@ -9,7 +9,7 @@
  * @copyright 2010-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.2
+ * @version 1.2.1
  */
 
 if (!defined('SMF'))
@@ -203,6 +203,8 @@ final class Highlighting
 			$style_set[$file] = ucwords(strtr($file, array('-' => ' ', '/' => ' - ')));
 		}
 
+		ksort($style_set);
+
 		$config_vars = array(
 			array('check', 'ch_enable'),
 			array('check', 'ch_cdn_use'),
@@ -239,9 +241,9 @@ final class Highlighting
 		if (empty($modSettings['ch_enable']))
 			return;
 
-		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/code-highlighting' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
+		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/highlight.js-for-smf' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2021, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2022, Bugo';
 	}
 
 	private function shouldItWork(): bool
