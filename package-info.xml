@@ -3,7 +3,7 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:Highlighting</id>
 	<name>highlight.js for SMF</name>
-	<version>1.2.1</version>
+	<version>1.2.2</version>
 	<type>modification</type>
 
 	<install for="2.1.*">
@@ -21,7 +21,6 @@
 		<remove-file name="$themedir/scripts/highlight.min.js" />
 		<remove-file name="$themedir/scripts/highlightjs-line-numbers.min.js" />
 		<remove-file name="$themedir/scripts/clipboard.min.js" />
-		<remove-file name="$themedir/images/clippy.svg" />
 		<remove-file name="$themedir/css/highlight.css" />
 		<remove-dir name="$languagedir/Highlighting" />
 		<remove-dir name="$themedir/css/highlight" />

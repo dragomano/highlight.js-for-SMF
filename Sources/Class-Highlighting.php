@@ -9,7 +9,7 @@
  * @copyright 2010-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.2.1
+ * @version 1.2.2
  */
 
 if (!defined('SMF'))
@@ -179,7 +179,7 @@ final class Highlighting
 		$context['page_title']     = $txt['ch_title'];
 		$context['settings_title'] = $txt['ch_settings'];
 		$context['post_url']       = $scripturl . '?action=admin;area=modsettings;save;sa=highlight';
-		$context[$context['admin_menu_name']]['tab_data']['tabs']['highlight'] = array('description' => $txt['ch_desc']);
+		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['ch_desc'];
 
 		$addSettings = [];
 		if (!isset($modSettings['ch_cdn_use']))
