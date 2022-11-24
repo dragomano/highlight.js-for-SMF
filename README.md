@@ -3,7 +3,7 @@
 ![License](https://img.shields.io/github/license/dragomano/code-highlighting)
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 
-* **Tested on:** PHP 7.4.28
+* **Tested on:** PHP 7.4.32
 * **Languages:** English, French, Russian, Spanish
 
 ## Description

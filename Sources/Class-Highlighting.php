@@ -9,7 +9,7 @@
  * @copyright 2010-2022 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.2.2
+ * @version 1.2.3
  */
 
 if (!defined('SMF'))
@@ -60,7 +60,7 @@ final class Highlighting
 		if (! $this->shouldItWork())
 			return;
 
-		if (!empty($modSettings['ch_cdn_use'])) {
+		if (! empty($modSettings['ch_cdn_use'])) {
 			$context['ch_jss_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js';
 			$context['ch_dln_path'] = 'https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2/dist/highlightjs-line-numbers.min.js';
 			$context['ch_clb_path'] = 'https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js';
@@ -75,11 +75,11 @@ final class Highlighting
 		loadCSSFile('highlight.css');
 
 		$context['insert_after_template'] .= '
-		<script src="' . $context['ch_jss_path'] . '"></script>' . (!empty($modSettings['ch_line_numbers']) ? '
+		<script src="' . $context['ch_jss_path'] . '"></script>' . (! empty($modSettings['ch_line_numbers']) ? '
 		<script src="' . $context['ch_dln_path'] . '"></script>' : '') . '
 		<script src="' . $context['ch_clb_path'] . '"></script>
 		<script>
-			hljs.highlightAll();' . (!empty($modSettings['ch_line_numbers']) ? '
+			hljs.highlightAll();' . (! empty($modSettings['ch_line_numbers']) ? '
 			hljs.initLineNumbersOnLoad();' : '') . '
 			window.addEventListener("load", function() {
 				let pre = document.getElementsByTagName("code");
@@ -112,7 +112,7 @@ final class Highlighting
 		if (! $this->shouldItWork())
 			return;
 
-		if (!empty($modSettings['ch_fontsize'])) {
+		if (! empty($modSettings['ch_fontsize'])) {
 			$fontSize = ' style="font-size: ' . $modSettings['ch_fontsize'] . '"';
 		}
 
@@ -179,16 +179,15 @@ final class Highlighting
 		$context['page_title']     = $txt['ch_title'];
 		$context['settings_title'] = $txt['ch_settings'];
 		$context['post_url']       = $scripturl . '?action=admin;area=modsettings;save;sa=highlight';
-		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['ch_desc'];
 
 		$addSettings = [];
-		if (!isset($modSettings['ch_cdn_use']))
+		if (! isset($modSettings['ch_cdn_use']))
 			$addSettings['ch_cdn_use'] = 1;
-		if (!isset($modSettings['ch_style']))
+		if (! isset($modSettings['ch_style']))
 			$addSettings['ch_style'] = 'default';
-		if (!isset($modSettings['ch_fontsize']))
+		if (! isset($modSettings['ch_fontsize']))
 			$addSettings['ch_fontsize'] = 'medium';
-		if (!empty($addSettings))
+		if (! empty($addSettings))
 			updateSettings($addSettings);
 
 		$style_list = array_merge(
@@ -213,13 +212,15 @@ final class Highlighting
 			array('check', 'ch_line_numbers')
 		);
 
-		if (!empty($modSettings['ch_enable']) && function_exists('file_get_contents')) {
+		if (! empty($modSettings['ch_enable']) && function_exists('file_get_contents')) {
 			$config_vars[] = array('callback', 'ch_example');
 			$config_vars[] = '<br>';
 		}
 
 		if ($return_config)
 			return $config_vars;
+
+		$context[$context['admin_menu_name']]['tab_data']['description'] = $txt['ch_desc'];
 
 		// Saving?
 		if (isset($_GET['save'])) {
@@ -256,7 +257,7 @@ final class Highlighting
 		if (in_array($context['current_action'], array('helpadmin', 'printpage')) || $context['current_subaction'] === 'showoperations')
 			return false;
 
-		return empty($modSettings['disabledBBC']) || !in_array('code', explode(',', $modSettings['disabledBBC']));
+		return empty($modSettings['disabledBBC']) || ! in_array('code', explode(',', $modSettings['disabledBBC']));
 	}
 }
 
