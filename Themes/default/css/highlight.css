@@ -3,7 +3,7 @@
 }
 .block_code pre code {
 	display: block;
-	font-family: "DejaVu Sans Mono", Monaco, Consolas, monospace;
+	font-family: "Fira Code", "DejaVu Sans Mono", Menlo, Monaco, Consolas, monospace;
 	white-space: pre-wrap;
 }
 pre {
@@ -13,6 +13,16 @@ pre {
 	border: 2px solid #ddd;
 	border-radius: 2px;
 	position: relative;
+}
+.block_code.bbc_code {
+	margin: 0;
+	padding: 0;
+	border: none;
+	background: none;
+	white-space: nowrap !important;
+}
+.block_code.bbc_code pre {
+	max-height: initial;
 }
 .bd-clipboard {
 	position: relative;
@@ -24,11 +34,11 @@ pre {
 	}
 }
 .bd-clipboard+pre{
-	margin-top:0;
+	margin-top: 0;
 }
 pre .btn-clipboard {
 	position: absolute;
-	right: 4px;
+	right: 14px;
 	top: 4px;
 	background-color: #eee;
 	border-color: #ddd;
@@ -64,4 +74,7 @@ pre .btn-clipboard {
 }
 .hljs-ln-code {
 	padding-left: 10px !important;
+}
+.hljs-ln-n {
+	padding-right: 10px !important;
 }

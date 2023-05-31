@@ -1,13 +1,5 @@
 <?php
 
-/**
- * .russian.php
- *
- * @package Code Highlighting (Highlight.js for SMF)
- * @author Bugo https://dragomano.ru/mods/code-highlighting
- *
- */
-
 $txt['ch_title']        = 'Подсветка синтаксиса';
 $txt['ch_settings']     = 'Настройки подсветки';
 $txt['ch_desc']         = 'Здесь можно включить/отключить подсветку, а также выбрать предпочитаемую тему оформления кода.';
@@ -16,5 +8,6 @@ $txt['ch_cdn_use']      = 'Использовать CDN для загрузки 
 $txt['ch_style']        = 'Стиль подсветки';
 $txt['ch_fontsize']     = 'Размер шрифта';
 $txt['ch_line_numbers'] = 'Отображать номера строк';
+$txt['ch_legacy_links'] = 'Отображать ссылки «Выделить» и «Развернуть»';
 $txt['ch_example']      = 'Образец подсветки';
 $txt['ch_copy']         = 'Скопировать';

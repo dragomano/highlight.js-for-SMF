@@ -6,10 +6,10 @@
  * @package highlight.js for SMF
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/highlight.js-for-smf
- * @copyright 2010-2022 Bugo
+ * @copyright 2010-2023 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.2.3
+ * @version 1.3
  */
 
 if (!defined('SMF'))
@@ -112,13 +112,21 @@ final class Highlighting
 		if (! $this->shouldItWork())
 			return;
 
-		if (! empty($modSettings['ch_fontsize'])) {
-			$fontSize = ' style="font-size: ' . $modSettings['ch_fontsize'] . '"';
-		}
-
 		$codes = array_filter($codes, function ($code) {
 			return $code['tag'] !== 'code';
 		});
+
+		$content = '';
+		$class = 'block_code';
+		if (! empty($modSettings['ch_legacy_links'])) {
+			$content = '<div class="codeheader"><span class="code floatleft">' . $txt['code'] . '</span> <a class="codeoperation smf_select_text">' . $txt['code_select'] . '</a> <a class="codeoperation smf_expand_code hidden" data-shrink-txt="' . $txt['code_shrink'] . '" data-expand-txt="' . $txt['code_expand'] . '">' . $txt['code_expand'] . '</a></div>';
+			$class .= ' bbc_code';
+		}
+
+		$fontSize = '';
+		if (! empty($modSettings['ch_fontsize'])) {
+			$fontSize = ' style="font-size: ' . $modSettings['ch_fontsize'] . '"';
+		}
 
 		$codes[] = 	array(
 			'tag' => 'code',
@@ -127,14 +135,14 @@ final class Highlighting
 				'lang' => array('optional' => true, 'value' => ' class="language-$1"'),
 				'start' => array('optional' => true, 'match' => '(\d+)', 'value' => ' data-ln-start-from="$1"'),
 			),
-			'content' => '<figure class="block_code"' . ($fontSize ?? '') . '><pre><code{lang}{start}>$1</code></pre></figure>',
+			'content' => $content . '<figure class="' . $class . '"' . $fontSize . '><pre><code{lang}{start}>$1</code></pre></figure>',
 			'block_level' => true
 		);
 
 		$codes[] = array(
 			'tag' => 'code',
 			'type' => 'unparsed_equals_content',
-			'content' => '<figure class="block_code"' . ($fontSize ?? '') . '><figcaption class="codeheader">' . $txt['code'] . ': $2</figcaption><pre><code class="language-$2">$1</code></pre></figure>',
+			'content' => $content . '<figure class="' . $class . '"' . $fontSize . '><figcaption class="codeheader">' . $txt['code'] . ': $2</figcaption><pre><code class="language-$2">$1</code></pre></figure>',
 			'block_level' => true
 		);
 	}
@@ -209,7 +217,8 @@ final class Highlighting
 			array('check', 'ch_cdn_use'),
 			array('select', 'ch_style', $style_set),
 			array('select', 'ch_fontsize', self::FONTSIZE_SET),
-			array('check', 'ch_line_numbers')
+			array('check', 'ch_line_numbers'),
+			array('check', 'ch_legacy_links')
 		);
 
 		if (! empty($modSettings['ch_enable']) && function_exists('file_get_contents')) {
@@ -244,7 +253,7 @@ final class Highlighting
 
 		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/highlight.js-for-smf' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2022, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2023, Bugo';
 	}
 
 	private function shouldItWork(): bool
