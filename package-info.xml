@@ -3,14 +3,14 @@
 <package-info xmlns="http://www.simplemachines.org/xml/package-info" xmlns:smf="http://www.simplemachines.org/">
 	<id>Bugo:Highlighting</id>
 	<name>highlight.js for SMF</name>
-	<version>1.2.3</version>
+	<version>1.3</version>
 	<type>modification</type>
 
 	<install for="2.1.*">
 		<readme parsebbc="true" lang="russian">readme/russian.txt</readme>
 		<readme parsebbc="true" lang="english">readme/english.txt</readme>
 		<require-dir name="Themes" destination="$boarddir" />
-		<require-dir name="Sources" destination="$boarddir" />
+		<require-file name="Sources/Class-Highlighting.php" destination="$sourcedir" />
 		<hook hook="integrate_pre_load" function="Highlighting::hooks#" file="$sourcedir/Class-Highlighting.php" />
 		<redirect url="?action=admin;area=modsettings;sa=highlight" timeout="1000" />
 	</install>
