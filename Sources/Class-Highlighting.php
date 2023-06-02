@@ -60,27 +60,27 @@ final class Highlighting
 		if (! $this->shouldItWork())
 			return;
 
-		if (! empty($modSettings['ch_cdn_use'])) {
-			$context['ch_jss_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js';
-			$context['ch_dln_path'] = 'https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2/dist/highlightjs-line-numbers.min.js';
-			$context['ch_clb_path'] = 'https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js';
-		} else {
+		if (empty($modSettings['ch_cdn_use'])) {
 			$context['ch_jss_path'] = $settings['default_theme_url'] . '/scripts/highlight.min.js';
 			$context['ch_dln_path'] = $settings['default_theme_url'] . '/scripts/highlightjs-line-numbers.min.js';
 			$context['ch_clb_path'] = $settings['default_theme_url'] . '/scripts/clipboard.min.js';
 
 			loadCSSFile('highlight/' . ($modSettings['ch_style'] ?? 'default') . '.min.css');
+		} else {
+			$context['ch_jss_path'] = 'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/highlight.min.js';
+			$context['ch_dln_path'] = 'https://cdn.jsdelivr.net/npm/highlightjs-line-numbers.js@2/dist/highlightjs-line-numbers.min.js';
+			$context['ch_clb_path'] = 'https://cdn.jsdelivr.net/npm/clipboard@2/dist/clipboard.min.js';
 		}
 
 		loadCSSFile('highlight.css');
 
 		$context['insert_after_template'] .= '
-		<script src="' . $context['ch_jss_path'] . '"></script>' . (! empty($modSettings['ch_line_numbers']) ? '
-		<script src="' . $context['ch_dln_path'] . '"></script>' : '') . '
-		<script src="' . $context['ch_clb_path'] . '"></script>
+		<script src="' . $context['ch_jss_path'] . '"></script>' . (empty($modSettings['ch_line_numbers']) ? '' : '
+		<script src="' . $context['ch_dln_path'] . '"></script>') . (empty($modSettings['ch_copy_button']) ? '' : '
+		<script src="' . $context['ch_clb_path'] . '"></script>') . '
 		<script>
-			hljs.highlightAll();' . (! empty($modSettings['ch_line_numbers']) ? '
-			hljs.initLineNumbersOnLoad();' : '') . '
+			hljs.highlightAll();' . (empty($modSettings['ch_line_numbers']) ? '' : '
+			hljs.initLineNumbersOnLoad();') . (empty($modSettings['ch_copy_button']) ? '' : '
 			window.addEventListener("load", function() {
 				let pre = document.getElementsByTagName("code");
 				for (let i = 0; i < pre.length; i++) {
@@ -101,7 +101,7 @@ final class Highlighting
 				btnClipboard.on("success", function(e) {
 					e.clearSelection();
 				});
-			});
+			});') . '
 		</script>';
 	}
 
@@ -195,8 +195,7 @@ final class Highlighting
 			$addSettings['ch_style'] = 'default';
 		if (! isset($modSettings['ch_fontsize']))
 			$addSettings['ch_fontsize'] = 'medium';
-		if (! empty($addSettings))
-			updateSettings($addSettings);
+		updateSettings($addSettings);
 
 		$style_list = array_merge(
 			glob($settings['default_theme_dir'] . "/css/highlight/*.css"),
@@ -218,6 +217,7 @@ final class Highlighting
 			array('select', 'ch_style', $style_set),
 			array('select', 'ch_fontsize', self::FONTSIZE_SET),
 			array('check', 'ch_line_numbers'),
+			array('check', 'ch_copy_button'),
 			array('check', 'ch_legacy_links')
 		);
 

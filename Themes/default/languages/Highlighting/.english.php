@@ -8,6 +8,7 @@ $txt['ch_cdn_use']      = 'Use CDN service to load highlight scripts and styles'
 $txt['ch_style']        = 'Theme';
 $txt['ch_fontsize']     = 'Font size';
 $txt['ch_line_numbers'] = 'Display line numbers';
+$txt['ch_copy_button']  = 'Display button to copy text to clipboard';
 $txt['ch_legacy_links'] = 'Display "Select" and "Expand" links';
 $txt['ch_example']      = 'Example';
 $txt['ch_copy']         = 'Copy';
