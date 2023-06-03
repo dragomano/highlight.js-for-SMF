@@ -4,7 +4,8 @@
 .block_code pre code {
 	display: block;
 	font-family: "Fira Code", "DejaVu Sans Mono", Menlo, Monaco, Consolas, monospace;
-	white-space: pre-wrap;
+	overflow: auto !important;
+	height: auto !important;
 }
 pre {
 	overflow: auto;
