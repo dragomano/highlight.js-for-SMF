@@ -119,7 +119,7 @@ final class Highlighting
 		$content = '';
 		$class = 'block_code';
 		if (! empty($modSettings['ch_legacy_links'])) {
-			$content = '<div class="codeheader"><span class="code floatleft">' . $txt['code'] . '</span> <a class="codeoperation smf_select_text">' . $txt['code_select'] . '</a> <a class="codeoperation smf_expand_code hidden" data-shrink-txt="' . $txt['code_shrink'] . '" data-expand-txt="' . $txt['code_expand'] . '">' . $txt['code_expand'] . '</a></div>';
+			$content = '<div class="codeheader"><span class="code floatleft">' . $txt['code'] . '</span> %s<a class="codeoperation smf_select_text">' . $txt['code_select'] . '</a> <a class="codeoperation smf_expand_code hidden" data-shrink-txt="' . $txt['code_shrink'] . '" data-expand-txt="' . $txt['code_expand'] . '">' . $txt['code_expand'] . '</a></div>';
 			$class .= ' bbc_code';
 		}
 
@@ -135,14 +135,14 @@ final class Highlighting
 				'lang' => array('optional' => true, 'value' => ' class="language-$1"'),
 				'start' => array('optional' => true, 'match' => '(\d+)', 'value' => ' data-ln-start-from="$1"'),
 			),
-			'content' => $content . '<figure class="' . $class . '"' . $fontSize . '><pre><code{lang}{start}>$1</code></pre></figure>',
+			'content' => sprintf($content, '') . '<figure class="' . $class . '"' . $fontSize . '><pre><code{lang}{start}>$1</code></pre></figure>',
 			'block_level' => true
 		);
 
 		$codes[] = array(
 			'tag' => 'code',
 			'type' => 'unparsed_equals_content',
-			'content' => $content . '<figure class="' . $class . '"' . $fontSize . '><figcaption class="codeheader">' . $txt['code'] . ': $2</figcaption><pre><code class="language-$2">$1</code></pre></figure>',
+			'content' => sprintf($content, ' <span class="lang">$2</span> ') . '<figure class="' . $class . '"' . $fontSize . '>' . (empty($modSettings['ch_legacy_links']) ? '<figcaption class="codeheader">' . $txt['code'] . ': <span class="lang">$2</span></figcaption>' : '') . '<pre><code class="language-$2">$1</code></pre></figure>',
 			'block_level' => true
 		);
 	}

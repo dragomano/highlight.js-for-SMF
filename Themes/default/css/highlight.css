@@ -59,6 +59,9 @@ pre .btn-clipboard {
 .btn-clipboard:hover {
 	background-color: #d9d9d9;
 }
+.codeheader span.lang {
+	text-transform: uppercase;
+}
 
 .hljs-ln-numbers {
 	-webkit-touch-callout: none;
