@@ -4,7 +4,7 @@
 ![Hooks only: Yes](https://img.shields.io/badge/Hooks%20only-YES-blue)
 
 * **Tested on:** PHP 8.2.6
-* **Languages:** English, French, Russian, Spanish
+* **Languages:** English, French, Russian, Spanish, German
 
 ## Description
 This script highlights syntax in code examples on your forum.
