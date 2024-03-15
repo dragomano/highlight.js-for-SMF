@@ -6,10 +6,10 @@
  * @package highlight.js for SMF
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/highlight.js-for-smf
- * @copyright 2010-2023 Bugo
+ * @copyright 2010-2024 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3
+ * @version 1.3.3
  */
 
 if (!defined('SMF'))
@@ -26,7 +26,7 @@ final class Highlighting
 		'x-large' => 'x-large'
 	];
 
-	public function hooks()
+	public function hooks(): void
 	{
 		add_integration_function('integrate_pre_css_output', __CLASS__ . '::preCssOutput#', false, __FILE__);
 		add_integration_function('integrate_load_theme', __CLASS__ . '::loadTheme#', false, __FILE__);
@@ -41,7 +41,7 @@ final class Highlighting
 	/**
 	 * @hook integrate_pre_css_output
 	 */
-	public function preCssOutput()
+	public function preCssOutput(): void
 	{
 		global $modSettings;
 
@@ -51,7 +51,7 @@ final class Highlighting
 		echo "\n\t" . '<link rel="preload" href="https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@latest/build/styles/' . ($modSettings['ch_style'] ?? 'default') . '.min.css" as="style" onload="this.onload=null;this.rel=\'stylesheet\'">';
 	}
 
-	public function loadTheme()
+	public function loadTheme(): void
 	{
 		global $modSettings, $context, $settings, $txt;
 
@@ -74,7 +74,7 @@ final class Highlighting
 
 		loadCSSFile('highlight.css');
 
-		$context['insert_after_template'] .= '
+		$context['insert_after_template'] .= /** @lang text */ '
 		<script src="' . $context['ch_jss_path'] . '"></script>' . (empty($modSettings['ch_line_numbers']) ? '' : '
 		<script src="' . $context['ch_dln_path'] . '"></script>') . (empty($modSettings['ch_copy_button']) ? '' : '
 		<script src="' . $context['ch_clb_path'] . '"></script>') . '
@@ -105,7 +105,7 @@ final class Highlighting
 		</script>';
 	}
 
-	public function bbcCodes(array &$codes)
+	public function bbcCodes(array &$codes): void
 	{
 		global $modSettings, $txt;
 
@@ -128,53 +128,52 @@ final class Highlighting
 			$fontSize = ' style="font-size: ' . $modSettings['ch_fontsize'] . '"';
 		}
 
-		$codes[] = 	array(
+		$codes[] = 	[
 			'tag' => 'code',
 			'type' => 'unparsed_content',
-			'parameters' => array(
-				'lang' => array('optional' => true, 'value' => ' class="language-$1"'),
-				'start' => array('optional' => true, 'match' => '(\d+)', 'value' => ' data-ln-start-from="$1"'),
-			),
+			'parameters' => [
+				'lang' => ['optional' => true, 'value' => ' class="language-$1"'],
+				'start' => ['optional' => true, 'match' => '(\d+)', 'value' => ' data-ln-start-from="$1"'],
+			],
 			'content' => sprintf($content, '') . '<figure class="' . $class . '"' . $fontSize . '><pre><code{lang}{start}>$1</code></pre></figure>',
 			'block_level' => true
-		);
+		];
 
-		$codes[] = array(
+		$codes[] = [
 			'tag' => 'code',
 			'type' => 'unparsed_equals_content',
 			'content' => sprintf($content, ' <span class="lang">$2</span> ') . '<figure class="' . $class . '"' . $fontSize . '>' . (empty($modSettings['ch_legacy_links']) ? '<figcaption class="codeheader">' . $txt['code'] . ': <span class="lang">$2</span></figcaption>' : '') . '<pre><code class="language-$2">$1</code></pre></figure>',
 			'block_level' => true
-		);
+		];
 	}
 
-	public function postParseBbc(string &$message)
+	public function postParseBbc(string &$message): void
 	{
 		if (! $this->shouldItWork() || strpos($message, '<pre') === false)
 			return;
 
-		$message = preg_replace_callback('~<pre(.*?)>(.*?)<\/pre>~si', function ($matches) {
+		$message = preg_replace_callback('~<pre(.*?)>(.*?)</pre>~si', function ($matches) {
 			$result = str_replace(['<br>', '<br />'], PHP_EOL, $matches[0]);
 			$result = preg_replace('/\s*(<\/code>)/', PHP_EOL . '${1}', $result);
-			$result = preg_replace('/(<code[^>]*>)\s*/', PHP_EOL . '${1}', $result);
-			return $result;
+			return preg_replace('/(<code[^>]*>)\s*/', PHP_EOL . '${1}', $result);
 		}, $message);
 	}
 
-	public function adminAreas(array &$admin_areas)
+	public function adminAreas(array &$admin_areas): void
 	{
 		global $txt;
 
-		$admin_areas['config']['areas']['modsettings']['subsections']['highlight'] = array($txt['ch_title']);
+		$admin_areas['config']['areas']['modsettings']['subsections']['highlight'] = [$txt['ch_title']];
 	}
 
-	public function adminSearch(array &$language_files, array &$include_files, array &$settings_search)
+	public function adminSearch(array &$language_files, array &$include_files, array &$settings_search): void
 	{
-		$settings_search[] = array(array($this, 'settings'), 'area=modsettings;sa=highlight');
+		$settings_search[] = [[$this, 'settings'], 'area=modsettings;sa=highlight'];
 	}
 
-	public function modifyModifications(array &$subActions)
+	public function modifyModifications(array &$subActions): void
 	{
-		$subActions['highlight'] = array($this, 'settings');
+		$subActions['highlight'] = [$this, 'settings'];
 	}
 
 	/**
@@ -197,32 +196,33 @@ final class Highlighting
 			$addSettings['ch_fontsize'] = 'medium';
 		updateSettings($addSettings);
 
-		$style_list = array_merge(
+		$styleList = array_merge(
 			glob($settings['default_theme_dir'] . "/css/highlight/*.css"),
 			glob($settings['default_theme_dir'] . "/css/highlight/base16/*.css")
 		);
-		$style_set  = array();
-		foreach ($style_list as $file) {
-			$search           = array($settings['default_theme_dir'] . "/css/highlight/", '.css', '.min');
-			$replace          = array('', '', '');
-			$file             = str_replace($search, $replace, $file);
-			$style_set[$file] = ucwords(strtr($file, array('-' => ' ', '/' => ' - ')));
+
+		$styleSet  = [];
+		foreach ($styleList as $file) {
+			$search          = [$settings['default_theme_dir'] . "/css/highlight/", '.css', '.min'];
+			$replace         = ['', '', ''];
+			$file            = str_replace($search, $replace, $file);
+			$styleSet[$file] = ucwords(strtr($file, ['-' => ' ', '/' => ' - ']));
 		}
 
-		ksort($style_set);
+		ksort($styleSet);
 
-		$config_vars = array(
-			array('check', 'ch_enable'),
-			array('check', 'ch_cdn_use'),
-			array('select', 'ch_style', $style_set),
-			array('select', 'ch_fontsize', self::FONTSIZE_SET),
-			array('check', 'ch_line_numbers'),
-			array('check', 'ch_copy_button'),
-			array('check', 'ch_legacy_links')
-		);
+		$config_vars = [
+			['check', 'ch_enable'],
+			['check', 'ch_cdn_use'],
+			['select', 'ch_style', $styleSet],
+			['select', 'ch_fontsize', self::FONTSIZE_SET],
+			['check', 'ch_line_numbers'],
+			['check', 'ch_copy_button'],
+			['check', 'ch_legacy_links']
+		];
 
-		if (! empty($modSettings['ch_enable']) && function_exists('file_get_contents')) {
-			$config_vars[] = array('callback', 'ch_example');
+		if (! empty($modSettings['ch_enable'])) {
+			$config_vars[] = ['callback', 'ch_example'];
 			$config_vars[] = '<br>';
 		}
 
@@ -244,16 +244,16 @@ final class Highlighting
 		prepareDBSettingContext($config_vars);
 	}
 
-	public function credits()
+	public function credits(): void
 	{
-		global $modSettings, $context;
+		global $modSettings, $txt, $context;
 
 		if (empty($modSettings['ch_enable']))
 			return;
 
-		$link = $context['user']['language'] == 'russian' ? 'https://dragomano.ru/mods/highlight.js-for-smf' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
+		$link = $txt['lang_dictionary'] === 'ru' ? 'https://dragomano.ru/mods/highlight.js-for-smf' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2023, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2024, Bugo';
 	}
 
 	private function shouldItWork(): bool
@@ -263,14 +263,14 @@ final class Highlighting
 		if (SMF === 'BACKGROUND' || SMF === 'SSI' || empty($modSettings['enableBBC']) || empty($modSettings['ch_enable']))
 			return false;
 
-		if (in_array($context['current_action'], array('helpadmin', 'printpage')) || $context['current_subaction'] === 'showoperations')
+		if (in_array($context['current_action'], ['helpadmin', 'printpage']) || $context['current_subaction'] === 'showoperations')
 			return false;
 
 		return empty($modSettings['disabledBBC']) || ! in_array('code', explode(',', $modSettings['disabledBBC']));
 	}
 }
 
-function template_callback_ch_example()
+function template_callback_ch_example(): void
 {
 	global $settings, $txt;
 
