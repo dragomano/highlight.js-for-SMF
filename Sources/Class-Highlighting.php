@@ -9,7 +9,7 @@
  * @copyright 2010-2024 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3.3
+ * @version 1.3.4
  */
 
 if (!defined('SMF'))
