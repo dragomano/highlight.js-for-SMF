@@ -6,10 +6,10 @@
  * @package highlight.js for SMF
  * @link https://custom.simplemachines.org/mods/index.php?mod=2925
  * @author Bugo https://dragomano.ru/mods/highlight.js-for-smf
- * @copyright 2010-2024 Bugo
+ * @copyright 2010-2026 Bugo
  * @license https://opensource.org/licenses/BSD-3-Clause BSD
  *
- * @version 1.3.4
+ * @version 1.3.5
  */
 
 if (!defined('SMF'))
@@ -253,7 +253,7 @@ final class Highlighting
 
 		$link = $txt['lang_dictionary'] === 'ru' ? 'https://dragomano.ru/mods/highlight.js-for-smf' : 'https://custom.simplemachines.org/mods/index.php?mod=2925';
 
-		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;2024, Bugo';
+		$context['credits_modifications'][] = '<a href="' . $link . '" target="_blank" rel="noopener">highlight.js for SMF</a> &copy; 2010&ndash;' . date('Y') . ', Bugo';
 	}
 
 	private function shouldItWork(): bool
